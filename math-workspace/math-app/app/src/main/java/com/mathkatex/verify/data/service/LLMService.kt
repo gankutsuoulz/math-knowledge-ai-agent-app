@@ -7,7 +7,7 @@ import kotlinx.coroutines.withContext
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
-import okhttp3.RequestBody
+import okhttp3.RequestBody.Companion.toRequestBody
 import java.util.concurrent.TimeUnit
 
 /**
@@ -41,13 +41,20 @@ class LLMService {
     
     /**
      * 使用多模态模型理解图片中的数学题目
-     * @param imageBase64 图片的base64编码（data URI格式）
+     * @param imageBase64 图片的base64编码（可带 data:image/...;base64, 前缀）
      * @param prompt 提示词
      * @return 解析结果或错误信息
      */
     suspend fun analyzeMathImage(imageBase64: String, prompt: String = ""): Result<String> {
         if (apiKey.isEmpty()) {
             return Result.failure(Exception("请先在设置中配置 API Key"))
+        }
+
+        // Strip data URI prefix if present
+        val cleanBase64 = if (imageBase64.startsWith("data:")) {
+            imageBase64.substringAfter(",")
+        } else {
+            imageBase64
         }
         
         return try {
@@ -65,7 +72,7 @@ class LLMService {
                 "请仔细分析这张图片中的数学题目，给出完整的解题步骤和答案。"
             }
             
-            val messagesJson = buildVisionMessagesJson(systemPrompt, userPrompt, imageBase64)
+            val messagesJson = buildVisionMessagesJson(systemPrompt, userPrompt, cleanBase64)
             val model = if (provider == Provider.XIAOMI) VISION_MODEL else "deepseek-chat"
             
             val jsonBody = buildString {
@@ -116,10 +123,10 @@ class LLMService {
     
     private suspend fun sendRequest(jsonBody: String): String = withContext(Dispatchers.IO) {
         val request = Request.Builder()
-            .url("${provider.baseUrl}v1/chat/completions")
+            .url("${provider.baseUrl}/v1/chat/completions")
             .addHeader("Authorization", "Bearer $apiKey")
             .addHeader("Content-Type", "application/json")
-            .post(RequestBody.create(jsonBody.toMediaType(), jsonBody))
+            .post(jsonBody.toRequestBody("application/json".toMediaType()))
             .build()
         
         val resp = client.newCall(request).execute()
