@@ -1,6 +1,7 @@
 package com.mathkatex.verify.util
 
 import android.content.Context
+import android.os.Environment
 import java.io.File
 import java.io.PrintWriter
 import java.io.StringWriter
@@ -10,10 +11,10 @@ import java.util.Locale
 import java.util.concurrent.ConcurrentLinkedQueue
 
 /**
- * 文件日志工具 - 写入 APP 内部存储
+ * 文件日志工具 - 写入 APP 外部私有存储的 Download 目录
+ * 无需权限，Android 4.4+ 兼容
  */
 object LogFileManager {
-    private const val LOG_DIR = "logs"
     private const val LOG_FILE = "math_app.log"
     private const val MAX_SIZE = 2 * 1024 * 1024 // 2MB
 
@@ -23,9 +24,14 @@ object LogFileManager {
 
     fun init(context: Context) {
         if (initialized) return
-        val dir = File(context.filesDir, LOG_DIR)
-        if (!dir.exists()) dir.mkdirs()
-        logFile = File(dir, LOG_FILE)
+        // 使用 APP 外部私有存储的 Downloads 目录，无需权限
+        val downloadDir = context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS)
+        if (downloadDir == null) {
+            initialized = false
+            return
+        }
+        if (!downloadDir.exists()) downloadDir.mkdirs()
+        logFile = File(downloadDir, LOG_FILE)
         // Truncate if too big
         logFile?.let { f ->
             if (f.exists() && f.length() > MAX_SIZE) {
@@ -33,7 +39,6 @@ object LogFileManager {
             }
         }
         initialized = true
-        // Write startup marker
         log("INFO", "LogFileManager initialized, app start")
     }
 
@@ -73,6 +78,10 @@ object LogFileManager {
     }
 
     fun getLogFile(): File? = logFile
+
+    fun getLogPath(): String {
+        return logFile?.absolutePath ?: "(not initialized)"
+    }
 
     fun readLastLines(n: Int = 100): String {
         val f = logFile ?: return ""
