@@ -20,6 +20,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
+import com.mathkatex.verify.util.LogFileManager
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -38,6 +39,8 @@ class MainActivity : ComponentActivity() {
         
         // 初始化设置管理
         SettingsManager.init(applicationContext)
+        // 初始化日志文件
+        LogFileManager.init(applicationContext)
         
         setContent {
             KaTeXVerifyTheme {

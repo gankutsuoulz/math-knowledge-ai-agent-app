@@ -2,6 +2,7 @@ package com.mathkatex.verify.data.service
 
 import com.google.gson.JsonArray
 import com.google.gson.JsonObject
+import com.mathkatex.verify.util.LogFileManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.MediaType.Companion.toMediaType
@@ -83,12 +84,13 @@ class LLMService {
                 append("\"max_tokens\":4096}")
             }
             
-            System.out.println(">>> Math Vision Request: provider=$provider model=$model")
+            LogFileManager.logRequest("LLMService", "provider=$provider model=$model json=${jsonBody.substring(0, minOf(jsonBody.length, 500))}")
             
             val response = sendRequest(jsonBody)
+            LogFileManager.logResponse("LLMService", response)
             return parseResponse(response)
         } catch (e: Exception) {
-            System.out.println("<<< Vision Exception: ${e.message}")
+            LogFileManager.logError("LLMService", "Vision Exception: ${e.message}", e)
             Result.failure(e)
         }
     }

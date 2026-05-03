@@ -35,6 +35,7 @@ import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import com.mathkatex.verify.data.SettingsManager
 import com.mathkatex.verify.data.service.LLMService
+import com.mathkatex.verify.util.LogFileManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -297,10 +298,12 @@ fun PhotoSolveScreen() {
                             
                             apiResult.fold(
                                 onSuccess = { response ->
+                                    LogFileManager.logResponse("PhotoSolve", response)
                                     result = SolveResult(rawResponse = response)
                                     currentStep = PhotoSolveStep.Completed
                                 },
                                 onFailure = { error ->
+                                    LogFileManager.logError("PhotoSolve", error.message ?: "Unknown error", error)
                                     errorMessage = error.message ?: "未知错误"
                                     currentStep = PhotoSolveStep.Error
                                 }
