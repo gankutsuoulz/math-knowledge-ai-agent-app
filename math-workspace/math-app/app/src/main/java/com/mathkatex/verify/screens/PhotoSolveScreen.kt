@@ -413,11 +413,10 @@ fun PhotoSolveScreen() {
                                     )
                                 }
                                 
-                                Text(
-                                    text = solveResult.rawResponse,
-                                    fontSize = 14.sp,
-                                    color = Color(0xFF424242),
-                                    modifier = Modifier.padding(bottom = 16.dp)
+                                MarkdownKaTeXText(
+                                    content = solveResult.rawResponse,
+                                    modifier = Modifier.padding(bottom = 16.dp),
+                                    textColor = Color(0xFF424242)
                                 )
                                 
                                 Spacer(modifier = Modifier.height(16.dp))
