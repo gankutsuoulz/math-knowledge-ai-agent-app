@@ -17,7 +17,7 @@ class LLMService {
     
     enum class Provider(val displayName: String, val baseUrl: String) {
         DEEPSEEK("DeepSeek", "https://api.deepseek.com/"),
-        XIAOMI("小米 (Mimo)", "https://api.xiaomimimo.com/v1")
+        XIAOMI("小米 (Mimo)", "https://api.xiaomimimo.com")
     }
     
     companion object {
@@ -119,7 +119,7 @@ class LLMService {
             .url("${provider.baseUrl}v1/chat/completions")
             .addHeader("Authorization", "Bearer $apiKey")
             .addHeader("Content-Type", "application/json")
-            .post(RequestBody.create("application/json".toMediaType(), jsonBody))
+            .post(RequestBody.create(jsonBody.toMediaType(), jsonBody))
             .build()
         
         val resp = client.newCall(request).execute()
