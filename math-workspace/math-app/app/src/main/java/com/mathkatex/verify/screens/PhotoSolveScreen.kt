@@ -33,6 +33,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
+import com.mathkatex.verify.screens.MarkdownWebView
 import com.mathkatex.verify.data.SettingsManager
 import com.mathkatex.verify.data.service.LLMService
 import com.mathkatex.verify.util.LogFileManager
@@ -416,10 +417,12 @@ fun PhotoSolveScreen() {
                                     )
                                 }
                                 
-                                MarkdownKaTeXText(
-                                    content = solveResult.rawResponse,
-                                    modifier = Modifier.padding(bottom = 16.dp),
-                                    textColor = Color(0xFF424242)
+                                MarkdownWebView(
+                                    markdown = solveResult.rawResponse,
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(bottom = 16.dp)
+                                        .heightIn(min = 100)
                                 )
                                 
                                 Spacer(modifier = Modifier.height(16.dp))
