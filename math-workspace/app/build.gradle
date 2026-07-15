@@ -3,7 +3,45 @@ plugins {
     id 'org.jetbrains.kotlin.android'
 }
 
+// 自动版本号递增：编译时 versionCode +1，versionName 第三位 +1
+// 调用方式：./gradlew assembleDebug 会自动递增
+// 格式：major.minor.patch
+// 如需手动指定：./gradlew assembleDebug -PbuildVersion=1.2.3
+def computeVersionName() {
+    if (project.hasProperty('buildVersion')) {
+        return project.property('buildVersion')
+    }
+    // 尝试从上次编译状态读取
+    def versionFile = file('build/version.properties')
+    def versionProps = new Properties()
+    if (versionFile.exists()) {
+        versionFile.withInputStream { versionProps.load(it) }
+    }
+    def major = versionProps.getProperty('VERSION_MAJOR', '1').toInteger()
+    def minor = versionProps.getProperty('VERSION_MINOR', '1').toInteger()
+    def patch = versionProps.getProperty('VERSION_PATCH', '0').toInteger() + 1
+    versionProps.setProperty('VERSION_MAJOR', major.toString())
+    versionProps.setProperty('VERSION_MINOR', minor.toString())
+    versionProps.setProperty('VERSION_PATCH', patch.toString())
+    versionFile.parentFile.mkdirs()
+    versionFile.withOutputStream { versionProps.store(it, 'Auto-incremented by build') }
+    return "${major}.${minor}.${patch}"
+}
+
+def computeVersionCode() {
+    if (project.hasProperty('buildVersionCode')) {
+        return project.property('buildVersionCode').toInteger()
+    }
+    // 基于时间戳生成唯一 versionCode
+    return (System.currentTimeMillis() / 1000).toInteger()
+}
+
 android {
+    applicationVariants.configureEach { variant ->
+        variant.outputs.configureEach {
+            outputFileName = "math-app-${variant.versionName}.apk"
+        }
+    }
     namespace 'com.mathkatex.verify'
     compileSdk 34
 
@@ -20,8 +58,8 @@ android {
         applicationId "com.mathkatex.verify"
         minSdk 26
         targetSdk 34
-        versionCode 2
-        versionName "1.1.1"
+        versionCode computeVersionCode()
+        versionName computeVersionName()
 
         vectorDrawables {
             useSupportLibrary true
