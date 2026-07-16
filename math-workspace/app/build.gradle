@@ -1,18 +1,15 @@
 plugins {
     id 'com.android.application'
     id 'org.jetbrains.kotlin.android'
+    id 'com.google.devtools.ksp' version '1.9.22-1.0.17'
 }
 
-// 自动版本号递增：编译时 versionCode +1，versionName 第三位 +1
-// 调用方式：./gradlew assembleDebug 会自动递增
-// 格式：major.minor.patch
-// 如需手动指定：./gradlew assembleDebug -PbuildVersion=1.2.3
+// 自动版本号递增
 def computeVersionName() {
     if (project.hasProperty('buildVersion')) {
         return project.property('buildVersion')
     }
-    // 尝试从上次编译状态读取
-    def versionFile = file('build/version.properties')
+    def versionFile = file('version.properties')
     def versionProps = new Properties()
     if (versionFile.exists()) {
         versionFile.withInputStream { versionProps.load(it) }
@@ -32,7 +29,6 @@ def computeVersionCode() {
     if (project.hasProperty('buildVersionCode')) {
         return project.property('buildVersionCode').toInteger()
     }
-    // 基于时间戳生成唯一 versionCode
     return (System.currentTimeMillis() / 1000).toInteger()
 }
 
@@ -73,7 +69,7 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
         debug {
-            // Use default Android Debug signing
+            signingConfig signingConfigs.release
         }
     }
 
@@ -107,7 +103,7 @@ dependencies {
     implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.7.0'
     implementation 'androidx.activity:activity-compose:1.8.2'
     
-    // Compose BOM - defines versions for all Compose modules
+    // Compose BOM
     implementation platform('androidx.compose:compose-bom:2024.02.00')
     implementation 'androidx.compose.ui:ui'
     implementation 'androidx.compose.ui:ui-graphics'
@@ -119,7 +115,7 @@ dependencies {
     // Navigation
     implementation 'androidx.navigation:navigation-compose:2.7.7'
     
-    // WebView for KaTeX rendering
+    // WebView for KaTeX
     implementation 'androidx.webkit:webkit:1.8.0'
     
     // Network & JSON
@@ -129,7 +125,17 @@ dependencies {
     // Markdown parsing
     implementation 'org.commonmark:commonmark:0.21.0'
     
+    // Room Database
+    def room_version = "2.6.1"
+    implementation "androidx.room:room-runtime:$room_version"
+    implementation "androidx.room:room-ktx:$room_version"
+    ksp "androidx.room:room-compiler:$room_version"
+    
+    // Lifecycle ViewModel Compose
+    implementation 'androidx.lifecycle:lifecycle-viewmodel-compose:2.7.0'
+    
     // Debug
     debugImplementation 'androidx.compose.ui:ui-tooling'
     debugImplementation 'androidx.compose.ui:ui-test-manifest'
 }
+

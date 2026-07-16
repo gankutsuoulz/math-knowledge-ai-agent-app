@@ -21,10 +21,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
+import com.mathkatex.verify.data.local.KnowledgeRepository
 import com.mathkatex.verify.util.LogFileManager
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -42,6 +44,10 @@ class MainActivity : ComponentActivity() {
         SettingsManager.init(applicationContext)
         // 初始化日志文件
         LogFileManager.init(applicationContext)
+        // 初始化知识点数据库（异步）
+        lifecycleScope.launchWhenStarted {
+            KnowledgeRepository.init(applicationContext)
+        }
         
         setContent {
             KaTeXVerifyTheme {

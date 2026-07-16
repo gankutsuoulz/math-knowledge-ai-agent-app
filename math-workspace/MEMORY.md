@@ -1,16 +1,17 @@
 # MEMORY.md — 数学工作区长期记忆
 
-> 更新：2026-05-01
+> 更新：2026-07-16
 
 ## 工作区路径
-`/projects/math-workspace/`
+`/projects/math-app/math-workspace/`
 
 ## 项目：数学知识助手 APP
 
 ### 项目概述
 - **目标**：创建数学类安卓APP
-- **源码路径**：`/projects/math-workspace/math-app/`
-- **知识来源**：`dim1-formula.md`（维度一：五年级~高三，四大板块）
+- **源码路径**：`/projects/math-app/math-workspace/app/`（单层 app 模块）
+- **GitHub 仓库**：`gankutsuoulz/math-knowledge-ai-agent-app`
+- **知识来源**：`dim1-formula.md` ~ `dim4-formula.md`（四维度框架）
 - **模型架构**：
   - 处理基座：xiaomi mimo v2.5-pro（文字推理）+ mimo-v2.5（图像识别）
   - 可选：deepseek-v4-pro（文字推理）
@@ -29,9 +30,17 @@
 - **知识点总数**：约395个
 - **年级覆盖**：五年级 ~ 高三
 
+### 版本号规则
+- **版本格式**：`major.minor.patch`
+- **自增规则**：每次构建 patch 自动 +1（从 `build/version.properties` 读取/写入）
+- **versionCode**：使用当前时间戳（秒级），每次构建不同
+- **当前版本**：1.1.19（2026-07-16）
+- **APK 输出名**：`math-app-{versionName}.apk`
+- **手动指定版本**：`./gradlew assembleRelease -PbuildVersion=1.2.0 -PbuildVersionCode=123`
+
 ---
 
-## 题库设计（新增）
+## 题库设计
 
 ### 双层题库结构
 1. **标准题库**
@@ -59,20 +68,20 @@
 
 ## 功能需求（F-01~F-08）
 
-| 编号 | 功能 | 优先级 |
-|------|------|--------|
-| F-01 | 拍照解题（拍照/框选/AI分析） | P0 |
-| F-02 | 知识点速查（LaTeX公式渲染） | P0 |
-| F-03 | 例题练习（分知识点刷题） | P0 |
-| F-04 | 例题库管理（导入/导出/双层结构） | P0 |
-| F-05 | 收藏夹（收藏保护机制） | P1 |
-| F-06 | 搜索功能 | P1 |
-| F-07 | 错误辅导（AI引导自主解决） | P0 |
-| F-08 | 拍照转公式（LaTeX提取） | P2 |
+| 编号 | 功能 | 优先级 | 状态 |
+|------|------|--------|------|
+| F-01 | 拍照解题（拍照/框选/AI分析） | P0 | ✅ 已实现 |
+| F-02 | 知识点速查（LaTeX公式渲染） | P0 | 🔄 待完善三级分类 |
+| F-03 | 例题练习（分知识点刷题） | P0 | ✅ 已实现 |
+| F-04 | 例题库管理（导入/导出/双层结构） | P0 | ✅ 已实现 |
+| F-05 | 收藏夹（收藏保护机制） | P1 | ✅ 已实现 |
+| F-06 | 搜索功能 | P1 | ✅ 已实现 |
+| F-07 | 错误辅导（AI引导自主解决） | P0 | ✅ 已实现 |
+| F-08 | 拍照转公式（LaTeX提取） | P2 | ⏳ 待实现 |
 
 ---
 
-## 页面设计（9页）
+## 页面设计（12页）
 
 1. 首页（Home）
 2. 拍照解题页
@@ -83,6 +92,9 @@
 7. 答案解析页
 8. 收藏夹页
 9. 设置页（API Key配置入口）
+10. 搜索页
+11. 例题库管理页
+12. 拍照转公式页
 
 ---
 
@@ -91,26 +103,29 @@
 | 层级 | 技术选型 |
 |------|---------|
 | 前端框架 | Kotlin + Jetpack Compose |
-| 公式渲染 | KaTeX |
+| 公式渲染 | KaTeX（WebView） |
 | 图片框选 | Canvas + Touch事件 |
 | AI图像识别 | mimo-v2.5（直调） |
 | AI文字推理 | mimo-v2.5-pro 或 deepseek-v4-pro（可切换） |
-| 本地存储 | Room数据库 |
-| DI | Hilt |
-| 架构 | MVVM + Clean Architecture |
+| 本地存储 | Room数据库 + KSP |
+| 架构 | MVVM |
 | 最小SDK | API 26（Android 8.0） |
+| 目标SDK | API 34 |
+| 编译SDK | API 34 |
 
 ---
 
-## 开发计划
+## 重要注意事项
 
-| 阶段 | 周次 | 交付物 |
-|------|------|--------|
-| 第一阶段 | 第1-2周 | 基础框架、知识点模块 |
-| 第二阶段 | 第3-5周 | 例题库系统（双层结构） |
-| 第三阶段 | 第6-8周 | 拍照解题、AI辅导 |
-| 第四阶段 | 第9-10周 | 练习与收藏（含保护机制） |
-| 第五阶段 | 第11-12周 | 测试优化、发布 |
+### 代码目录不要混淆
+- **正确目录**：`/projects/math-app/math-workspace/`（Git v1.1.x）
+- **旧的副本目录**：`/projects/verify-app/`（v1.0 副本，不要碰）
+- 两个目录关联同一 Git remote，但 verify-app 是旧 commit
+
+### 知识点速查（F-02）
+- 当前状态：已实现 `KnowledgeScreen.kt` 基础知识展示
+- 待办：给知识点增加二级分类（SubTopic）支持三级导航
+- `KnowledgeScreen.kt` 位置：`app/src/main/java/com/mathkatex/verify/screens/KnowledgeScreen.kt`
 
 ---
 
@@ -120,8 +135,15 @@
 - 原始知识点框架文件创建
 - 四套维度框架（dim1-dim4）生成完成
 
-### 2026-05-01 数学APP项目启动
-- 用户提出创建数学APP需求
-- 通过mimo-v2-pro整理需求并生成原型
-- 需求收集：6条基础需求 + 2条修正需求
-- 原型文档完成：PROTOTYPE_V1.md（740行）
+### 2026-05-01 项目启动
+- 数学APP需求提出，原型生成
+- 需求收集完成，PROTOTYPE_V1.md 完成
+
+### 2026-07-15 v1.1.1+ 构建
+- 版本号更新，WebView 公式渲染修复
+- GitHub 仓库持续推送
+
+### 2026-07-16 检查确认
+- 确认正确代码目录为 `/projects/math-app/math-workspace/`
+- 版本号 1.1.19（version.properties），自动 patch 递增
+- settings.gradle 单层 `app/` 结构，无需额外配置

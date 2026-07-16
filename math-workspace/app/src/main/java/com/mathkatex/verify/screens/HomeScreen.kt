@@ -144,17 +144,6 @@ fun FormulaConvertScreen() {
 }
 
 @Composable
-fun KnowledgeScreen() {
-    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Icon(Icons.Default.Book, contentDescription = null, modifier = Modifier.size(64.dp))
-            Spacer(modifier = Modifier.height(16.dp))
-            Text("知识点速查功能开发中...")
-        }
-    }
-}
-
-@Composable
 fun PracticeScreen() {
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
