@@ -191,6 +191,21 @@ private fun markdownToHtmlInner(markdown: String): String {
                 }
                 sb.append("</blockquote>\n")
             }
+            line.contains("|") && i + 1 < lines.size && isTableSeparator(lines[i + 1]) -> {
+                val headers = splitTableRow(line)
+                sb.append("<table><thead><tr>")
+                headers.forEach { sb.append("<th>").append(processInlineSimple(it)).append("</th>") }
+                sb.append("</tr></thead><tbody>\n")
+                i += 2
+                while (i < lines.size && lines[i].contains("|") && !lines[i].isBlank()) {
+                    val cells = splitTableRow(lines[i])
+                    sb.append("<tr>")
+                    cells.forEach { sb.append("<td>").append(processInlineSimple(it)).append("</td>") }
+                    sb.append("</tr>\n")
+                    i++
+                }
+                sb.append("</tbody></table>\n")
+            }
             line.isBlank() -> { i++ }
             else -> {
                 sb.append("<p>")
@@ -218,6 +233,19 @@ private fun processInlineSimple(text: String): String {
     result = result.replace(Regex("""`(.+?)`""")) { "<code>${escapeHtml(it.groupValues[1])}</code>" }
 
     return result
+}
+
+private fun isTableSeparator(line: String): Boolean {
+    val t = line.trim()
+    if (!t.contains("|")) return false
+    return t.replace("|", "").replace(":", "").replace("-", "").replace(" ", "").isEmpty()
+}
+
+private fun splitTableRow(line: String): List<String> {
+    var t = line.trim()
+    if (t.startsWith("|")) t = t.substring(1)
+    if (t.endsWith("|")) t = t.substring(0, t.length - 1)
+    return t.split("|").map { it.trim() }
 }
 
 private fun escapeHtml(text: String): String {
@@ -294,6 +322,9 @@ private fun buildFullHtml(markdown: String, dark: Boolean = false): String {
         a { color: #1565c0; text-decoration: underline; }
         .katex { font-size: 1.15em; }
         .katex-inline { padding: 0 1px; }
+        table { border-collapse: collapse; width: 100%; margin: 10px 0; font-size: 13px; }
+        th, td { border: 1px solid #e0e0e0; padding: 6px 8px; text-align: left; vertical-align: top; }
+        th { background: #f5f7fa; font-weight: 600; }
         .katex-display {
             margin: 14px 0;
             text-align: center;
@@ -312,6 +343,8 @@ private fun buildFullHtml(markdown: String, dark: Boolean = false): String {
         html.dark hr { border-top-color: #22314A; }
         html.dark a { color: #6EA8FF; }
         html.dark .katex-display { background: #17233A; }
+        html.dark th, html.dark td { border-color: #22314A; }
+        html.dark th { background: #17233A; }
     </style>
 </head>
 <body>
