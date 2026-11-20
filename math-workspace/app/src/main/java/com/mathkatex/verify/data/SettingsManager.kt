@@ -30,8 +30,8 @@ object SettingsManager {
     private const val KEY_PHOTO_PROMPT_ENABLED = "photo_prompt_enabled"
 
     // 默认值
-    private const val DEFAULT_XIAOMI_MODEL = "mimo-v2.6-pro"
-    private const val DEFAULT_XIAOMI_VISION_MODEL = "mimo-v2.6-pro"
+    private const val DEFAULT_XIAOMI_MODEL = "mimo-v2.6-pro-ultraspeed"
+    private const val DEFAULT_XIAOMI_VISION_MODEL = "mimo-v2.6-pro-ultraspeed"
     private const val DEFAULT_XIAOMI_BASE_URL = "https://api.xiaomimimo.com/v1"
     private const val DEFAULT_DEEPSEEK_MODEL = "deepseek-chat"
     private const val DEFAULT_DEEPSEEK_BASE_URL = "https://api.deepseek.com"

@@ -206,6 +206,24 @@ private fun markdownToHtmlInner(markdown: String): String {
                 }
                 sb.append("</tbody></table>\n")
             }
+            line.contains("|") && line.count { it == '|' } >= 2 &&
+                i + 1 < lines.size && lines[i + 1].contains("|") &&
+                lines[i + 1].count { it == '|' } >= 2 -> {
+                // 模型有时省略 Markdown 分隔行：连续竖线行也按表格渲染
+                val headers = splitTableRow(line)
+                sb.append("<table><thead><tr>")
+                headers.forEach { sb.append("<th>").append(processInlineSimple(it)).append("</th>") }
+                sb.append("</tr></thead><tbody>\n")
+                i++
+                while (i < lines.size && lines[i].contains("|") && lines[i].count { it == '|' } >= 2 && !lines[i].isBlank()) {
+                    val cells = splitTableRow(lines[i])
+                    sb.append("<tr>")
+                    cells.forEach { sb.append("<td>").append(processInlineSimple(it)).append("</td>") }
+                    sb.append("</tr>\n")
+                    i++
+                }
+                sb.append("</tbody></table>\n")
+            }
             line.isBlank() -> { i++ }
             else -> {
                 sb.append("<p>")

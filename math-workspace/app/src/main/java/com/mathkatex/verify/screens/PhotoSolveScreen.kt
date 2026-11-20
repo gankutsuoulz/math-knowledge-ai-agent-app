@@ -69,8 +69,13 @@ private const val JPEG_QUALITY = 85
 /** 结构化输出提示词：App 直接渲染成卡片，解析失败再退回 Markdown。 */
 private const val STRUCTURED_SOLVE_PROMPT = """你是一位耐心的初中数学老师。请先识别图片中的数学题目，再检查学生的解答。
 只输出一个 JSON 对象，不要用代码块包裹，字段如下：
-{"verdict":"对/错/部分对/未完成","question":"题干（LaTeX）","knowledge":["知识点1","知识点2"],"stuck":"卡在哪一步（一句话）","hints":["引导问题1","引导问题2","引导问题3"],"steps":["完整解析步骤1","步骤2"],"answer":"最终答案（LaTeX）"}
-要求：hints 只给启发式追问，不直接给答案；steps/answer 可以晚点再看。所有字段都要输出，不能返回空对象；识别不了时 question 写“无法识别题目”。"""
+{"verdict":"对/错/部分对/未完成","question":"题干（LaTeX）","knowledge":["知识点1","知识点2"],"stuck":"卡在哪一步（一句话）","hints":["解题引导1","解题引导2","解题引导3"],"steps":["完整解析步骤1","步骤2"],"answer":"最终答案（LaTeX）"}
+要求：
+1. hints 必须是 3 条分步「解题引导」：第 1 条引导观察结构/定位考点；第 2 条引导关键一步怎么想（可给式子方向，不直接给结果）；第 3 条提醒易错点和检查方法。不要直接给最终答案。
+2. JSON 字符串里的 LaTeX 反斜杠必须转义（例如 \frac{1}{3}），否则会解析失败。
+3. 所有字段都要输出，不能返回空对象；识别不了时 question 写“无法识别题目”。
+4. steps 给完整解析，answer 给最终答案。
+5. 遇到表格必须用 Markdown 表格（第二行 `|---|---|` 分隔），不要输出只有竖线没有分隔行的文本。"""
 
 sealed class PhotoSolveStep {
     object Idle : PhotoSolveStep()
@@ -930,7 +935,7 @@ private fun parseStructuredSolution(raw: String): StructuredSolution? {
     return try {
         val json = text.substring(start, end + 1)
         val parsed = Gson().fromJson(json, StructuredSolution::class.java)
-        if (parsed != null && parsed.hasContent()) return parsed
+        if (parsed != null && parsed.hasContent()) return repairLatex(parsed)
 
         // 兼容模型偶尔用中文字段名的情况
         val obj = JsonParser.parseString(json).asJsonObject
@@ -950,9 +955,28 @@ private fun parseStructuredSolution(raw: String): StructuredSolution? {
             hints = list("hints", "引导问题", "提示"),
             steps = list("steps", "解析", "步骤"),
             answer = str("answer", "答案"),
-        ).takeIf { it.hasContent() }
+        ).takeIf { it.hasContent() }?.let { repairLatex(it) }
     } catch (e: Exception) {
         LogFileManager.logError("PhotoSolve", "parseStructuredSolution failed: ${e.message}")
         null
     }
+}
+
+
+/** 模型偶尔把 LaTeX 的 \\f 等反斜杠写成 JSON 转义，恢复成可渲染的 LaTeX。 */
+private fun repairLatex(s: StructuredSolution): StructuredSolution {
+    fun fix(text: String): String = text
+        .replace("\u000c", "\\f")
+        .replace("\u000b", "\\v")
+        .replace("\u0008", "\\b")
+
+    return s.copy(
+        verdict = s.verdict?.let(::fix),
+        question = s.question?.let(::fix),
+        knowledge = s.knowledge.map(::fix),
+        stuck = s.stuck?.let(::fix),
+        hints = s.hints.map(::fix),
+        steps = s.steps.map(::fix),
+        answer = s.answer?.let(::fix),
+    )
 }

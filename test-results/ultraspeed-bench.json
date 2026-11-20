@@ -1,0 +1,80 @@
+[
+  {
+    "model": "mimo-v2.6-pro-ultraspeed",
+    "task": "Q4 绝对值化简",
+    "sec": 5.4,
+    "json_ok": true,
+    "answer": "-2a",
+    "verdict": "错",
+    "qlen": 91,
+    "hints": 3,
+    "steps": 4,
+    "comp": 408,
+    "reason": 0
+  },
+  {
+    "model": "mimo-v2.6-pro-ultraspeed",
+    "task": "Q1 数形结合",
+    "sec": 4.0,
+    "json_ok": true,
+    "answer": "449",
+    "verdict": "部分对",
+    "qlen": 159,
+    "hints": 3,
+    "steps": 4,
+    "comp": 484,
+    "reason": 0
+  },
+  {
+    "model": "mimo-v2.6-pro-ultraspeed",
+    "task": "面积方案题",
+    "sec": 5.0,
+    "json_ok": true,
+    "answer": "选择 A 方案",
+    "verdict": "部分对",
+    "qlen": 225,
+    "hints": 3,
+    "steps": 5,
+    "comp": 674,
+    "reason": 0
+  },
+  {
+    "model": "mimo-v2.6-pro",
+    "task": "Q4 绝对值化简",
+    "sec": 15.8,
+    "json_ok": true,
+    "answer": "-2a",
+    "verdict": "错",
+    "qlen": 106,
+    "hints": 3,
+    "steps": 3,
+    "comp": 537,
+    "reason": 0
+  },
+  {
+    "model": "mimo-v2.6-pro",
+    "task": "Q1 数形结合",
+    "sec": 50.0,
+    "json_ok": true,
+    "answer": "$1 - \\left(\\frac{1}{2}\\right)^n$ （或 $1$，若求极限）",
+    "verdict": "错",
+    "qlen": 197,
+    "hints": 3,
+    "steps": 4,
+    "comp": 1883,
+    "reason": 0
+  },
+  {
+    "model": "mimo-v2.6-pro",
+    "task": "面积方案题",
+    "sec": 27.4,
+    "json_ok": true,
+    "answer": "木地板：$14x+21$（即 $77\\text{m}^2$），地砖：$107-14x$（即 $51\\text{m}^2$）；选择 A 方案更合算",
+    "verdict": "部分对",
+    "qlen": 228,
+    "hints": 3,
+    "steps": 1,
+    "comp": 949,
+    "reason": 0
+  }
+]
