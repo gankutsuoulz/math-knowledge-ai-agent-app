@@ -18,3 +18,10 @@
 - 功能变更升 MINOR，修复升 PATCH；发布前跑：
   `GRADLE_USER_HOME=/home/dsh/飞书机器人/.mathapp/gradle-home ./gradlew --offline --no-daemon :app:assembleDebug :app:assembleRelease -x lintVitalAnalyzeRelease -x lintVitalRelease`
 - 锁定后改动需开新分支，验收再合入；不打远端（用户要求）。
+
+
+## v1.2.1 热修（2026-11-20）
+
+- 默认模型：mimo-v2.6-pro（文本/视觉），旧 v2.5 配置自动升级。
+- LLM max_tokens：MiMo 131072、DeepSeek 8192。
+- 桥接：hub 超时后静默等待并 5 分钟心跳，完成后再回结果，不提示超时。
