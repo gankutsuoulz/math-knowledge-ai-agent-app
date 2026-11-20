@@ -1,109 +1,193 @@
 package com.mathkatex.verify.screens
 
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material.icons.filled.Book
+import androidx.compose.material.icons.filled.CameraAlt
+import androidx.compose.material.icons.filled.ChevronRight
+import androidx.compose.material.icons.filled.Layers
+import androidx.compose.material.icons.filled.Schedule
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.outlined.BookmarkBorder
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavHostController
+import com.mathkatex.verify.R
+import com.mathkatex.verify.Screen
+import com.mathkatex.verify.ui.theme.AppColors
+import com.mathkatex.verify.ui.theme.LocalAppColors
+import java.util.Calendar
 
-data class MenuCardItem(
+private data class QuickEntry(
     val title: String,
-    val description: String,
+    val subtitle: String,
     val icon: ImageVector,
-    val onClick: () -> Unit
+    val route: String,
 )
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeScreen(navController: androidx.navigation.NavHostController) {
-    val menuItems = listOf(
-        MenuCardItem("拍照解题", "拍摄或选择图片识别数学题目", Icons.Default.CameraAlt) {
-            navController.navigate("photo_solve")
-        },
-        MenuCardItem("知识点速查", "按年级和章节查看数学知识点", Icons.Default.Book) {
-            navController.navigate("knowledge")
-        },
-        MenuCardItem("例题练习", "针对性练习各类数学题目", Icons.Default.Edit) {
-            navController.navigate("practice")
-        },
-        MenuCardItem("例题库管理", "管理个人例题库", Icons.Default.LibraryBooks) {
-            navController.navigate("library")
-        },
-        MenuCardItem("收藏夹", "查看收藏的题目和解答", Icons.Default.Favorite) {
-            navController.navigate("favorites")
-        },
-        MenuCardItem("搜索", "搜索题目、知识点或例题", Icons.Default.Search) {
-            navController.navigate("search")
-        },
-        MenuCardItem("错误辅导", "分析错题原因并提供辅导", Icons.Default.ErrorOutline) {
-            navController.navigate("error_guide")
-        },
-        MenuCardItem("拍照转公式", "将手写公式拍照转为标准格式", Icons.Default.Functions) {
-            navController.navigate("formula_convert")
-        },
-        MenuCardItem("设置", "应用设置和偏好配置", Icons.Default.Settings) {
-            navController.navigate("settings")
-        }
-    )
-    
+fun HomeScreen(navController: NavHostController) {
+    val colors = LocalAppColors.current
+    val hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
+    val hello = when {
+        hour < 6 -> "夜深了，同学"
+        hour < 12 -> "早上好，同学"
+        hour < 18 -> "下午好，同学"
+        else -> "晚上好，同学"
+    }
+
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
+            .background(colors.background)
+            .statusBarsPadding(),
+        contentPadding = PaddingValues(start = 20.dp, end = 20.dp, top = 14.dp, bottom = 20.dp),
+        verticalArrangement = Arrangement.spacedBy(14.dp),
     ) {
-        item {
+        item { HomeHeader(colors, hello) }
+        item { PhotoSolveCta(colors) { navController.navigate(Screen.PhotoSolve.route) } }
+        item { QuickGrid(colors, navController) }
+        item { ContinueCard(colors) { navController.navigate(Screen.Knowledge.route) } }
+        item { DailyStrip(colors) }
+    }
+}
+
+@Composable
+private fun HomeHeader(colors: AppColors, hello: String) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Column(modifier = Modifier.weight(1f)) {
             Text(
-                text = "数学解题助手",
-                fontSize = 24.sp,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(bottom = 8.dp)
+                text = hello,
+                color = colors.text3,
+                fontSize = 13.sp,
+            )
+            Spacer(Modifier.height(6.dp))
+            Text(
+                text = "今天想解决\n哪道题？",
+                style = MaterialTheme.typography.headlineMedium,
+                color = colors.text,
             )
         }
-        
-        items(menuItems) { item ->
-            Card(
-                onClick = item.onClick,
-                modifier = Modifier.fillMaxWidth()
+        Image(
+            painter = painterResource(R.drawable.avatar_jingxi),
+            contentDescription = "鲸喜",
+            contentScale = ContentScale.Crop,
+            modifier = Modifier
+                .size(46.dp)
+                .clip(RoundedCornerShape(15.dp))
+                .border(1.dp, colors.primary.copy(alpha = 0.16f), RoundedCornerShape(15.dp)),
+        )
+    }
+}
+
+@Composable
+private fun PhotoSolveCta(colors: AppColors, onClick: () -> Unit) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(158.dp)
+            .clip(RoundedCornerShape(26.dp))
+            .background(
+                Brush.linearGradient(
+                    // 深色模式下 primary 会变浅，实心 CTA 固定用深海蓝保证白字对比度
+                    listOf(Color(0xFF2563EB), Color(0xFF1D4ED8), Color(0xFF3B82F6)),
+                ),
+            )
+            .clickable(onClick = onClick)
+            .padding(20.dp),
+    ) {
+        Column {
+            Row(
+                modifier = Modifier
+                    .clip(CircleShape)
+                    .background(Color.White.copy(alpha = 0.16f))
+                    .border(1.dp, Color.White.copy(alpha = 0.20f), CircleShape)
+                    .padding(horizontal = 10.dp, vertical = 5.dp),
+                verticalAlignment = Alignment.CenterVertically,
             ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Icon(
-                        imageVector = item.icon,
-                        contentDescription = null,
-                        modifier = Modifier.size(40.dp),
-                        tint = MaterialTheme.colorScheme.primary
-                    )
-                    Spacer(modifier = Modifier.width(16.dp))
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(
-                            text = item.title,
-                            fontWeight = FontWeight.SemiBold,
-                            fontSize = 16.sp
-                        )
-                        Text(
-                            text = item.description,
-                            fontSize = 12.sp,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                    Icon(
-                        imageVector = Icons.Default.ChevronRight,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
+                Icon(
+                    imageVector = Icons.Default.Star,
+                    contentDescription = null,
+                    tint = Color.White,
+                    modifier = Modifier.size(12.dp),
+                )
+                Spacer(Modifier.width(5.dp))
+                Text("AI 引导式辅导", color = Color.White, fontSize = 11.sp, fontWeight = FontWeight.SemiBold)
+            }
+            Spacer(Modifier.height(14.dp))
+            Text("拍照解题", color = Color.White, fontSize = 26.sp, fontWeight = FontWeight.Bold)
+            Spacer(Modifier.height(6.dp))
+            Text("拍下题目，卡住了再给提示", color = Color.White.copy(alpha = 0.82f), fontSize = 13.sp)
+        }
+        Box(
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .size(50.dp)
+                .clip(RoundedCornerShape(18.dp))
+                .background(Color.White),
+            contentAlignment = Alignment.Center,
+        ) {
+            Icon(
+                imageVector = Icons.Default.CameraAlt,
+                contentDescription = null,
+                tint = colors.primaryStrong,
+                modifier = Modifier.size(25.dp),
+            )
+        }
+    }
+}
+
+@Composable
+private fun QuickGrid(colors: AppColors, navController: NavHostController) {
+    val entries = listOf(
+        QuickEntry("知识点速查", "公式 · 分类", Icons.Default.Book, Screen.Knowledge.route),
+        QuickEntry("错题本", "3 道待复习", Icons.Default.Layers, Screen.WrongBook.route),
+        QuickEntry("我的收藏", "12 个知识点", Icons.Outlined.BookmarkBorder, Screen.Favorites.route),
+        QuickEntry("例题练习", "分难度刷题", Icons.Default.Schedule, Screen.Practice.route),
+    )
+    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        entries.chunked(2).forEach { row ->
+            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                row.forEach { entry ->
+                    QuickCard(colors, entry, Modifier.weight(1f)) { navController.navigate(entry.route) }
                 }
             }
         }
@@ -111,67 +195,115 @@ fun HomeScreen(navController: androidx.navigation.NavHostController) {
 }
 
 @Composable
-fun ErrorGuideScreen() {
-    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Icon(Icons.Default.ErrorOutline, contentDescription = null, modifier = Modifier.size(64.dp))
-            Spacer(modifier = Modifier.height(16.dp))
-            Text("错误辅导功能开发中...")
+private fun QuickCard(colors: AppColors, entry: QuickEntry, modifier: Modifier, onClick: () -> Unit) {
+    Surface(
+        modifier = modifier.clickable(onClick = onClick),
+        color = colors.surface,
+        shape = RoundedCornerShape(20.dp),
+        border = BorderStroke(1.dp, colors.line),
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(36.dp)
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(colors.primarySoft),
+                contentAlignment = Alignment.Center,
+            ) {
+                Icon(entry.icon, contentDescription = null, tint = colors.primary, modifier = Modifier.size(19.dp))
+            }
+            Spacer(Modifier.width(12.dp))
+            Column {
+                Text(
+                    entry.title,
+                    fontSize = 13.5.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = colors.text,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+                Spacer(Modifier.height(3.dp))
+                Text(entry.subtitle, fontSize = 11.sp, color = colors.text3, maxLines = 1)
+            }
         }
     }
 }
 
 @Composable
-fun FavoritesScreen() {
-    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Icon(Icons.Default.Favorite, contentDescription = null, modifier = Modifier.size(64.dp))
-            Spacer(modifier = Modifier.height(16.dp))
-            Text("收藏夹功能开发中...")
+private fun ContinueCard(colors: AppColors, onClick: () -> Unit) {
+    Column {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 2.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text("继续上次", fontSize = 15.sp, fontWeight = FontWeight.Bold, color = colors.text)
+            Spacer(Modifier.weight(1f))
+            Text("全部", fontSize = 12.sp, color = colors.text3)
+        }
+        Spacer(Modifier.height(8.dp))
+        Surface(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable(onClick = onClick),
+            color = colors.surface,
+            shape = RoundedCornerShape(20.dp),
+            border = BorderStroke(1.dp, colors.line),
+        ) {
+            Row(
+                modifier = Modifier.padding(14.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(46.dp)
+                        .clip(CircleShape)
+                        .background(colors.primarySoft),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Text("3/8", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = colors.primary)
+                }
+                Spacer(Modifier.width(14.dp))
+                Column(modifier = Modifier.weight(1f)) {
+                    Text("数与代数 · 一元二次方程", fontSize = 11.sp, color = colors.text3)
+                    Spacer(Modifier.height(3.dp))
+                    Text("求根公式与判别式", fontSize = 14.sp, fontWeight = FontWeight.SemiBold, color = colors.text)
+                }
+                Icon(Icons.Default.ChevronRight, contentDescription = null, tint = colors.text3)
+            }
         }
     }
 }
 
 @Composable
-fun FormulaConvertScreen() {
-    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Icon(Icons.Default.Functions, contentDescription = null, modifier = Modifier.size(64.dp))
-            Spacer(modifier = Modifier.height(16.dp))
-            Text("公式转换功能开发中...")
-        }
-    }
-}
-
-@Composable
-fun PracticeScreen() {
-    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Icon(Icons.Default.Edit, contentDescription = null, modifier = Modifier.size(64.dp))
-            Spacer(modifier = Modifier.height(16.dp))
-            Text("例题练习功能开发中...")
-        }
-    }
-}
-
-@Composable
-fun LibraryScreen() {
-    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Icon(Icons.Default.LibraryBooks, contentDescription = null, modifier = Modifier.size(64.dp))
-            Spacer(modifier = Modifier.height(16.dp))
-            Text("例题库管理功能开发中...")
-        }
-    }
-}
-
-@Composable
-fun SearchScreen() {
-    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Icon(Icons.Default.Search, contentDescription = null, modifier = Modifier.size(64.dp))
-            Spacer(modifier = Modifier.height(16.dp))
-            Text("搜索功能开发中...")
+private fun DailyStrip(colors: AppColors) {
+    Surface(
+        color = colors.surface,
+        shape = RoundedCornerShape(16.dp),
+        border = BorderStroke(1.dp, colors.line),
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            repeat(4) { index ->
+                Box(
+                    modifier = Modifier
+                        .width(18.dp)
+                        .height(5.dp)
+                        .clip(CircleShape)
+                        .background(if (index < 2) colors.primary else colors.surface2),
+                )
+                Spacer(Modifier.width(5.dp))
+            }
+            Spacer(Modifier.width(5.dp))
+            Text("今日目标 2 / 4 题", fontSize = 12.5.sp, fontWeight = FontWeight.SemiBold, color = colors.text)
+            Spacer(Modifier.weight(1f))
+            Text("约 10 分钟", fontSize = 11.sp, color = colors.text3)
         }
     }
 }

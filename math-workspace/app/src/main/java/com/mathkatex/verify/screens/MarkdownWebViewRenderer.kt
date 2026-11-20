@@ -13,7 +13,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 
-private const val CDN_KATEX = "https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9"
+// 本地打包 KaTeX，断网也能渲染公式（assets/katex）
+private const val KATEX_BASE = "file:///android_asset/katex"
 
 /**
  * 将 Markdown 文本转换为 HTML，支持 KaTeX 公式渲染。
@@ -242,8 +243,8 @@ private fun buildFullHtml(markdown: String): String {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <link rel="stylesheet" href="$CDN_KATEX/katex.min.css">
-    <script src="$CDN_KATEX/katex.min.js"></script>
+    <link rel="stylesheet" href="$KATEX_BASE/katex.min.css">
+    <script src="$KATEX_BASE/katex.min.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         html, body { width: 100%; background: transparent; padding: 0; }
@@ -396,11 +397,11 @@ fun MarkdownWebView(
                 webViewClient = WebViewClient()
                 isHorizontalScrollBarEnabled = false
                 isVerticalScrollBarEnabled = false
-                loadDataWithBaseURL(CDN_KATEX, html, "text/html", "UTF-8", null)
+                loadDataWithBaseURL(KATEX_BASE, html, "text/html", "UTF-8", null)
             }
         },
         update = { webView ->
-            webView.loadDataWithBaseURL(CDN_KATEX, html, "text/html", "UTF-8", null)
+            webView.loadDataWithBaseURL(KATEX_BASE, html, "text/html", "UTF-8", null)
         },
         modifier = modifier.heightIn(min = minHeight.dp)
     )

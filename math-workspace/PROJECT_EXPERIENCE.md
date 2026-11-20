@@ -13,21 +13,20 @@
 - 远程：`https://github.com/gankutsuoulz/math-knowledge-ai-agent-app.git`
 - 推送需通过 SOCKS5 代理：`git -c http.proxy=socks5h://127.0.0.1:10808 push origin master`
 
-### 版本号规则
-- 自动递增：`build.gradle` 中 `computeVersionName()` 从 `version.properties` 读取
-- 格式：`major.minor.patch`，每次构建 patch +1
-- **注意**：version.properties 曾放在 `app/build/` 下，`clean` 会清掉
-- **修复**：已移至 `app/version.properties`（`app/build/` 之外），clean 不再重置
+### 版本号规则（2026-11-20 改）
+- 构建只读 `app/version.properties`，**不再**在配置阶段自增；发版显式 `./gradlew bumpVersion`
+- 格式：`major.minor.patch`，versionCode 存在 `VERSION_CODE`，单调递增
+- 签名口令改从 `local.properties` / 环境变量读，不再写死在 `build.gradle`
+- 注意：工作区路径含中文时 KSP 会报 plugin classpath 错误，构建请用纯英文路径
 
 ---
 
 ## 二、编译注意事项
 
-### 代理问题
-- `gradle.properties` 中配置了 HTTP 代理 `127.0.0.1:10809`，这是**曾立峰的开发习惯**
-- v2ray 服务可能已停止（`systemctl is-active v2ray` 检查）
-- 编译前必须确保 v2ray 在运行：`v2ray run -c /usr/local/etc/v2ray/config.json &`
-- 否则 Gradle 因代理端口不通反复重试 → OOM
+### 代理问题（2026-11-20 改）
+- 项目 `gradle.properties` 已移除写死的 10809 代理，避免 v2ray 停掉就构建失败/OOM
+- 需要代理时放在用户级 `~/.gradle/gradle.properties`，不要提交到仓库
+- 依赖已缓存时优先 `./gradlew --offline`
 
 ### 编译命令
 ```bash

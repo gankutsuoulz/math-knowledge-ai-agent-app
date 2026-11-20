@@ -162,7 +162,8 @@ object KnowledgeImporter {
                 }
                 (line.contains("知识点：") && line.startsWith("**")) -> {
                     idCounter.incrementAndGet()
-                    val title = line.removePrefix("**").removePrefix("知识点：").trimEnd('*', ' ', '）', ')', '（', '(')
+                    // 不要把结尾的「）」吃掉：标题里的年级括号要保留
+                    val title = line.removePrefix("**").removePrefix("知识点：").trim().removeSuffix("**").trim()
 
                     var formula = ""
                     val formulaMatch = Regex("""\$\$(.+?)\$\$""").find(line)
@@ -205,9 +206,14 @@ object KnowledgeImporter {
                         if (catLv1.isNotEmpty()) append(" > ").append(catLv1)
                         if (catLv2.isNotEmpty()) append(" > ").append(catLv2)
                         if (catLv3.isNotEmpty()) append(" > ").append(catLv3)
+                        if (catLv4.isNotEmpty()) append(" > ").append(catLv4)
                     }
 
-                    val id = generateId(currentBlock, currentGrade, idCounter.get())
+                    // 年级优先从知识点标题里取，标题没写才沿用分类标题的年级
+                    val titleGrade = extractGrade(title)
+                    val effectiveGrade = titleGrade.ifEmpty { currentGrade }
+
+                    val id = generateId(currentBlock, effectiveGrade, idCounter.get())
 
                     // 验证关键字段非空
                     var valid = true
@@ -224,7 +230,7 @@ object KnowledgeImporter {
 
                     if (valid) {
                         entities.add(KnowledgeEntity(
-                            id = id, block = currentBlock, grade = currentGrade,
+                            id = id, block = currentBlock, grade = effectiveGrade,
                             categoryLv1 = catLv1, categoryLv2 = catLv2,
                             categoryLv3 = catLv3, categoryLv4 = catLv4,
                             title = title, formula = formula,
@@ -252,10 +258,11 @@ object KnowledgeImporter {
     }
 
     private fun extractGrade(text: String): String {
-        gradeKeywords.forEach { (key, value) ->
-            if (text.contains(key)) return value
-        }
-        return ""
+        // 长 key 优先，避免「初一~初三」被「初一」抢先匹配
+        return gradeKeywords.entries
+            .sortedByDescending { it.key.length }
+            .firstOrNull { text.contains(it.key) }
+            ?.value ?: ""
     }
 
     private fun generateId(block: String, grade: String, id: Int): String {

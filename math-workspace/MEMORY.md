@@ -3,13 +3,13 @@
 > 更新：2026-07-16
 
 ## 工作区路径
-`/projects/math-app/math-workspace/`
+`/home/dsh/飞书机器人/projects/math-app/math-workspace/`（本地副本）
 
 ## 项目：数学知识助手 APP
 
 ### 项目概述
 - **目标**：创建数学类安卓APP
-- **源码路径**：`/projects/math-app/math-workspace/app/`（单层 app 模块）
+- **源码路径**：`/home/dsh/飞书机器人/projects/math-app/math-workspace/app/`（本地副本）（单层 app 模块）
 - **GitHub 仓库**：`gankutsuoulz/math-knowledge-ai-agent-app`
 - **知识来源**：`dim1-formula.md` ~ `dim4-formula.md`（四维度框架）
 - **模型架构**：
@@ -27,14 +27,14 @@
 
 ### 知识体系
 - **四大板块**：数与代数 / 图形与几何 / 统计与概率 / 综合与实践
-- **知识点总数**：约395个
+- **知识点总数**：368 个（dim1 主数据；dim2 思维层级 69、dim3 主线 54、dim4 题型 43 为独立维度，不合并）
 - **年级覆盖**：五年级 ~ 高三
 
 ### 版本号规则
 - **版本格式**：`major.minor.patch`
-- **自增规则**：每次构建 patch 自动 +1（从 `build/version.properties` 读取/写入）
-- **versionCode**：使用当前时间戳（秒级），每次构建不同
-- **当前版本**：1.1.19（2026-07-16）
+- **自增规则**：构建只读 `app/version.properties`，不再自动改；发版时显式执行 `./gradlew bumpVersion`（patch + versionCode 各 +1）
+- **versionCode**：存在 `VERSION_CODE`，单调递增，不再用时间戳
+- **当前版本**：1.1.26 / versionCode 1795107600（2026-11-20 改造后）
 - **APK 输出名**：`math-app-{versionName}.apk`
 - **手动指定版本**：`./gradlew assembleRelease -PbuildVersion=1.2.0 -PbuildVersionCode=123`
 
@@ -118,7 +118,7 @@
 ## 重要注意事项
 
 ### 代码目录不要混淆
-- **正确目录**：`/projects/math-app/math-workspace/`（Git v1.1.x）
+- **正确目录**：`/home/dsh/飞书机器人/projects/math-app/math-workspace/`（本地副本）（Git v1.1.x）
 - **旧的副本目录**：`/projects/verify-app/`（v1.0 副本，不要碰）
 - 两个目录关联同一 Git remote，但 verify-app 是旧 commit
 
@@ -144,6 +144,14 @@
 - GitHub 仓库持续推送
 
 ### 2026-07-16 检查确认
-- 确认正确代码目录为 `/projects/math-app/math-workspace/`
+- 确认正确代码目录为 `/home/dsh/飞书机器人/projects/math-app/math-workspace/`（本地副本）
 - 版本号 1.1.19（version.properties），自动 patch 递增
 - settings.gradle 单层 `app/` 结构，无需额外配置
+### 2026-11-20 版本锁定 v1.2.0
+- 例题库 60 道 / 20 个初一初二计算知识点；练习判分、错题本、收藏、我的统计真机验收
+- Room v3 迁移；应用图标换鲸喜自适应图标（64dp 安全区内，三种遮罩验证）
+- 版本锁定 1.2.0，本地 tag v1.2.0；release + debug 构建通过，不推远端
+
+### 2026-11-20 图标定稿
+- 图标改用 768px 宽幅原图（App 内 256px 头像顶部头饰被裁），脸部中线居中，头部完整不裁切
+- 本地 tag v1.2.0 更新，准备推 main

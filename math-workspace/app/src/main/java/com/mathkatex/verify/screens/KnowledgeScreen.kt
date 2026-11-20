@@ -2,9 +2,14 @@ package com.mathkatex.verify.screens
 
 import android.util.Log
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.ui.draw.clip
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -23,12 +28,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.mathkatex.verify.data.local.KnowledgeEntity
 import com.mathkatex.verify.data.local.KnowledgeRepository
+import com.mathkatex.verify.ui.theme.AppColors
+import com.mathkatex.verify.ui.theme.LocalAppColors
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-
-private val DetailTitleBlue = Color(0xFF1565C0)
-private val CardLightGray = Color(0xFFF5F5F5)
-private val DividerGray = Color(0xFFE0E0E0)
 
 /**
  * 知识点速查页面
@@ -48,6 +51,7 @@ fun KnowledgeScreen() {
     var selectedLv2 by remember { mutableStateOf("") }
     var selectedLv2Detail by remember { mutableStateOf("") }
     var selectedKnowledge by remember { mutableStateOf<KnowledgeEntity?>(null) }
+    var searchQuery by remember { mutableStateOf("") }
     var isLoading by remember { mutableStateOf(true) }
     var errorMsg by remember { mutableStateOf("") }
     var retryCount by remember { mutableStateOf(0) }
@@ -71,6 +75,9 @@ fun KnowledgeScreen() {
     }
 
     val lv1List = remember(blockLv1Map) { blockLv1Map.keys.toList() }
+    val lv1Counts = remember(allPoints) {
+        allPoints.groupBy { it.categoryLv1 }.mapValues { it.value.size }
+    }
 
     val currentLv2List = remember(selectedLv1, blockLv1Map) {
         if (selectedLv1.isEmpty()) emptyList()
@@ -101,33 +108,32 @@ fun KnowledgeScreen() {
         errorMsg = ""
         try {
             if (!KnowledgeRepository.isReady.value) {
-                Log.d("KnowledgeScreen", "Repository not ready, forcing reimport...")
                 withContext(Dispatchers.IO) { KnowledgeRepository.forceReimport(context) }
-                Log.d("KnowledgeScreen", "Reimport done, ready=${KnowledgeRepository.isReady.value}")
             }
             val loadedBlocks = withContext(Dispatchers.IO) { KnowledgeRepository.getBlocks() }
             val dbCount = withContext(Dispatchers.IO) { KnowledgeRepository.count() }
-            Log.d("KnowledgeScreen", "blocks=$loadedBlocks dbCount=$dbCount")
 
             // 全量加载所有知识点
             val all = withContext(Dispatchers.IO) { KnowledgeRepository.getAll() }
-            Log.d("KnowledgeScreen", "allPoints loaded=${all.size}")
 
             // 调试：检查第一条数据的 categoryLv2 是否为空
             if (all.isNotEmpty()) {
                 val first = all.first()
-                Log.d("KnowledgeScreen", "First point: block='${first.block}' lv1='${first.categoryLv1}' lv2='${first.categoryLv2}' title='${first.title}'")
                 // 检查所有 categoryLv2 的分布
                 val lv2Samples = all.map { it.categoryLv2 }.filter { it.isNotEmpty() }.distinct().take(10)
                 Log.d("KnowledgeScreen", "Sample categoryLv2 values (non-empty): $lv2Samples")
                 val emptyLv2Count = all.count { it.categoryLv2.isEmpty() }
-                Log.d("KnowledgeScreen", "Points with empty categoryLv2: $emptyLv2Count / ${all.size}")
             }
 
-            blocks = loadedBlocks
+            val preferredOrder = listOf("数与代数", "图形与几何", "统计与概率", "综合与实践")
+            val sortedBlocks = loadedBlocks.sortedBy { block ->
+                val index = preferredOrder.indexOf(block)
+                if (index < 0) preferredOrder.size else index
+            }
+            blocks = sortedBlocks
             allPoints = all
-            if (loadedBlocks.isNotEmpty()) {
-                selectedBlock = loadedBlocks[0]
+            if (sortedBlocks.isNotEmpty()) {
+                selectedBlock = sortedBlocks[0]
                 selectedLv1 = ""
                 selectedLv2 = ""
             } else {
@@ -142,13 +148,15 @@ fun KnowledgeScreen() {
     }
 
     // ── UI ──
+    val colors = LocalAppColors.current
     Scaffold(
+        containerColor = colors.background,
         topBar = {
             TopAppBar(
-                title = { Text("知识点速查", fontWeight = FontWeight.Bold) },
+                title = { Text("知识点", fontWeight = FontWeight.Bold, fontSize = 24.sp) },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                    containerColor = colors.background,
+                    titleContentColor = colors.text
                 )
             )
         }
@@ -178,16 +186,29 @@ fun KnowledgeScreen() {
                 selectedBlock = selectedBlock,
                 onBlockSelected = { selectedBlock = it; selectedLv1 = ""; selectedLv2 = ""; selectedLv2Detail = "" },
                 lv1List = lv1List,
+                lv1Counts = lv1Counts,
                 selectedLv1 = selectedLv1,
                 onLv1Selected = { selectedLv1 = if (selectedLv1 == it) "" else it; selectedLv2 = ""; selectedLv2Detail = "" },
                 lv2List = currentLv2List,
                 selectedLv2 = selectedLv2,
                 onLv2Selected = { selectedLv1 = selectedLv1; selectedLv2Detail = it },
                 knowledgeList = currentKnowledgeList,
+                allPoints = allPoints,
+                searchQuery = searchQuery,
+                onSearchQueryChange = { searchQuery = it },
                 onKnowledgeClick = { selectedKnowledge = it }
             )
         }
     }
+}
+
+/** 板块 Tab 上用短名，底层过滤仍用完整名。 */
+private fun shortBlockName(block: String): String = when {
+    block.contains("代数") -> "代数"
+    block.contains("几何") -> "几何"
+    block.contains("统计") -> "统计"
+    block.contains("综合") -> "综合"
+    else -> block
 }
 
 // ── 子组件 ──
@@ -256,22 +277,24 @@ private fun Lv2DetailListScreen(
                 }
         }.trim()
     }
+    val colors = LocalAppColors.current
     Scaffold(
+        containerColor = colors.background,
         topBar = {
             TopAppBar(
                 title = { Text(lv2Name, fontWeight = FontWeight.Bold, maxLines = 1, fontSize = 17.sp) },
                 navigationIcon = { IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, "返回") } },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                    containerColor = colors.background,
+                    titleContentColor = colors.text
                 )
             )
         }
     ) { paddingValues ->
-        Column(Modifier.fillMaxSize().padding(paddingValues)) {
+        Column(Modifier.fillMaxSize().background(colors.background).padding(paddingValues)) {
             Text("共 ${knowledgeList.size} 个知识点", fontSize = 12.sp,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp))
+                color = colors.text3,
+                modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp))
             MarkdownWebView(markdown = fullMarkdown, modifier = Modifier.fillMaxSize())
         }
     }
@@ -284,42 +307,111 @@ private fun ContentView(
     selectedBlock: String,
     onBlockSelected: (String) -> Unit,
     lv1List: List<String>,
+    lv1Counts: Map<String, Int>,
     selectedLv1: String,
     onLv1Selected: (String) -> Unit,
     lv2List: List<String>,
     selectedLv2: String,
     onLv2Selected: (String) -> Unit,
     knowledgeList: List<KnowledgeEntity>,
+    allPoints: List<KnowledgeEntity>,
+    searchQuery: String,
+    onSearchQueryChange: (String) -> Unit,
     onKnowledgeClick: (KnowledgeEntity) -> Unit
 ) {
-    Column(Modifier.fillMaxSize().padding(paddingValues)) {
+    val colors = LocalAppColors.current
+    Column(Modifier.fillMaxSize().background(colors.background).padding(paddingValues)) {
         if (blocks.isEmpty()) {
             Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Text("暂无知识点数据", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text("暂无知识点数据", color = colors.text3)
             }
             return
         }
 
-        // 板块 Tab
-        ScrollableTabRow(
-            selectedTabIndex = blocks.indexOf(selectedBlock).coerceAtLeast(0),
-            modifier = Modifier.fillMaxWidth(),
-            edgePadding = 8.dp
+        OutlinedTextField(
+            value = searchQuery,
+            onValueChange = onSearchQueryChange,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 20.dp, vertical = 6.dp),
+            placeholder = { Text("搜索知识点、公式", fontSize = 13.sp, color = colors.text3) },
+            leadingIcon = {
+                Icon(Icons.Default.Search, contentDescription = null, tint = colors.text3, modifier = Modifier.size(18.dp))
+            },
+            singleLine = true,
+            shape = RoundedCornerShape(14.dp),
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedBorderColor = colors.primary,
+                unfocusedBorderColor = colors.line,
+                focusedContainerColor = colors.surface,
+                unfocusedContainerColor = colors.surface,
+            ),
+        )
+
+        if (searchQuery.isNotBlank()) {
+            val results = remember(searchQuery, allPoints) {
+                val q = searchQuery.trim()
+                allPoints.filter {
+                    it.title.contains(q, ignoreCase = true) ||
+                        it.fullPath.contains(q, ignoreCase = true) ||
+                        it.formula.contains(q, ignoreCase = true)
+                }.take(60)
+            }
+            if (results.isEmpty()) {
+                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Text("没有找到「${searchQuery.trim()}」", color = colors.text3, fontSize = 13.sp)
+                }
+            } else {
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(start = 20.dp, end = 20.dp, top = 6.dp, bottom = 20.dp),
+                    verticalArrangement = Arrangement.spacedBy(10.dp),
+                ) {
+                    items(results) { knowledge ->
+                        KnowledgeItemCard(knowledge) { onKnowledgeClick(knowledge) }
+                    }
+                }
+            }
+        } else {
+        // 板块切换：胶囊按钮，显示短名，底层仍用完整板块名过滤
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 20.dp, vertical = 10.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             blocks.forEach { block ->
-                Tab(
-                    selected = block == selectedBlock,
-                    onClick = { onBlockSelected(block) },
-                    text = { Text(block, fontSize = 13.sp, maxLines = 1) }
-                )
+                val selected = block == selectedBlock
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .clip(RoundedCornerShape(999.dp))
+                        .background(if (selected) colors.primary else colors.surface)
+                        .border(
+                            width = 1.dp,
+                            color = if (selected) colors.primary else colors.line,
+                            shape = RoundedCornerShape(999.dp),
+                        )
+                        .clickable { onBlockSelected(block) }
+                        .padding(vertical = 8.dp),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Text(
+                        shortBlockName(block),
+                        fontSize = 12.5.sp,
+                        fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Normal,
+                        color = if (selected) Color.White else colors.text2,
+                        maxLines = 1,
+                    )
+                }
             }
         }
 
         // Lv1 列表
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(12.dp),
-            verticalArrangement = Arrangement.spacedBy(6.dp)
+            contentPadding = PaddingValues(start = 20.dp, end = 20.dp, top = 6.dp, bottom = 20.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
             itemsIndexed(lv1List) { _, lv1 ->
                 val subCats = if (lv1 == selectedLv1) lv2List else emptyList()
@@ -327,12 +419,14 @@ private fun ContentView(
 
                 CategoryLv1Card(
                     title = lv1,
+                    count = lv1Counts[lv1] ?: 0,
                     isExpanded = lv1 == selectedLv1,
                     subCategories = subCats,
                     onClick = { onLv1Selected(lv1) },
                     onLv2Click = { onLv2Selected(it) }
                 )
             }
+        }
         }
     }
 }
@@ -342,38 +436,59 @@ private fun ContentView(
 @Composable
 private fun CategoryLv1Card(
     title: String,
+    count: Int,
     isExpanded: Boolean,
     subCategories: List<String>,
     onClick: () -> Unit,
     onLv2Click: (String) -> Unit
 ) {
+    val colors = LocalAppColors.current
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(10.dp),
+        shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
-            containerColor = if (isExpanded) MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f)
-            else MaterialTheme.colorScheme.surface
+            containerColor = if (isExpanded) colors.primarySoft else colors.surface
         ),
-        elevation = CardDefaults.cardElevation(defaultElevation = if (isExpanded) 1.dp else 0.dp)
+        border = BorderStroke(1.dp, colors.line),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
         Column {
             Row(
-                modifier = Modifier.fillMaxWidth().clickable { onClick() }.padding(horizontal = 14.dp, vertical = 12.dp),
+                modifier = Modifier.fillMaxWidth().clickable { onClick() }.padding(horizontal = 12.dp, vertical = 10.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
+                Box(
+                    modifier = Modifier
+                        .size(36.dp)
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(colors.primarySoft),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Text(
+                        title.take(1),
+                        fontSize = 13.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        color = colors.primary,
+                    )
+                }
+                Spacer(Modifier.width(12.dp))
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(title, fontWeight = FontWeight.SemiBold, fontSize = 14.sp, color = colors.text)
+                    Spacer(Modifier.height(2.dp))
+                    Text("$count 个知识点", fontSize = 11.sp, color = colors.text3)
+                }
                 Icon(
-                    imageVector = if (isExpanded) Icons.Default.ExpandMore else Icons.Default.ChevronRight,
-                    contentDescription = null, modifier = Modifier.size(20.dp),
-                    tint = MaterialTheme.colorScheme.primary
+                    imageVector = Icons.Default.ChevronRight,
+                    contentDescription = null,
+                    modifier = Modifier.size(18.dp),
+                    tint = colors.text3,
                 )
-                Spacer(Modifier.width(8.dp))
-                Text(title, fontWeight = FontWeight.Medium, fontSize = 15.sp)
             }
             if (isExpanded) {
                 Column(modifier = Modifier.padding(start = 32.dp, end = 12.dp, bottom = 8.dp)) {
                     if (subCategories.isEmpty()) {
                         Text("该分类暂无子分类", fontSize = 12.sp,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            color = colors.text3,
                             modifier = Modifier.padding(vertical = 4.dp))
                     }
                     subCategories.forEach { lv2 ->
@@ -395,12 +510,11 @@ private fun Lv2Section(
     lv2: String, isSelected: Boolean, onClick: () -> Unit,
     knowledgeList: List<KnowledgeEntity>, onKnowledgeClick: (KnowledgeEntity) -> Unit
 ) {
+    val colors = LocalAppColors.current
     Card(
         modifier = Modifier.fillMaxWidth().padding(vertical = 3.dp),
-        shape = RoundedCornerShape(6.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
-        ),
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(containerColor = colors.surface2),
         onClick = onClick
     ) {
         Row(
@@ -410,15 +524,15 @@ private fun Lv2Section(
             Icon(
                 imageVector = Icons.Default.Article,
                 contentDescription = null, modifier = Modifier.size(18.dp),
-                tint = MaterialTheme.colorScheme.primary
+                tint = colors.primary
             )
             Spacer(Modifier.width(10.dp))
-            Text(lv2, fontSize = 14.sp, fontWeight = FontWeight.Medium,
-                modifier = Modifier.weight(1f))
+            Text(lv2, fontSize = 13.sp, fontWeight = FontWeight.Medium,
+                color = colors.text, modifier = Modifier.weight(1f))
             Icon(
                 imageVector = Icons.Default.ChevronRight,
                 contentDescription = null, modifier = Modifier.size(16.dp),
-                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                tint = colors.text3
             )
         }
     }
@@ -426,26 +540,28 @@ private fun Lv2Section(
 
 @Composable
 private fun KnowledgeItemCard(knowledge: KnowledgeEntity, onClick: () -> Unit) {
+    val colors = LocalAppColors.current
     Card(
         modifier = Modifier.fillMaxWidth().padding(vertical = 3.dp),
-        shape = RoundedCornerShape(8.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        elevation = CardDefaults.cardElevation(defaultElevation = 0.5.dp)
+        shape = RoundedCornerShape(14.dp),
+        colors = CardDefaults.cardColors(containerColor = colors.surface),
+        border = BorderStroke(1.dp, colors.line),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
         Row(
             modifier = Modifier.fillMaxWidth().clickable { onClick() }.padding(12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(Icons.Default.Science, contentDescription = null,
-                modifier = Modifier.size(18.dp), tint = MaterialTheme.colorScheme.primary)
+                modifier = Modifier.size(18.dp), tint = colors.primary)
             Spacer(Modifier.width(10.dp))
             Column(modifier = Modifier.weight(1f)) {
-                Text(knowledge.title, fontSize = 14.sp, fontWeight = FontWeight.Medium)
+                Text(knowledge.title, fontSize = 14.sp, fontWeight = FontWeight.Medium, color = colors.text)
                 if (knowledge.formula.isNotEmpty()) {
-                    Text(knowledge.formula, fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text(knowledge.formula, fontSize = 12.sp, color = colors.text3)
                 }
             }
-            Text(knowledge.grade, fontSize = 11.sp, color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Medium)
+            Text(knowledge.grade, fontSize = 11.sp, color = colors.primary, fontWeight = FontWeight.Medium)
         }
     }
 }
@@ -453,30 +569,33 @@ private fun KnowledgeItemCard(knowledge: KnowledgeEntity, onClick: () -> Unit) {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun KnowledgeDetailContent(knowledge: KnowledgeEntity, onBack: () -> Unit) {
+    val colors = LocalAppColors.current
     Scaffold(
+        containerColor = colors.background,
         topBar = {
             TopAppBar(
                 title = { Text(knowledge.title, fontWeight = FontWeight.Bold, maxLines = 1, fontSize = 17.sp) },
                 navigationIcon = { IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, "返回") } },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                    containerColor = colors.background,
+                    titleContentColor = colors.text
                 )
             )
         }
     ) { paddingValues ->
         Column(
-            modifier = Modifier.fillMaxSize().padding(paddingValues).padding(16.dp)
+            modifier = Modifier.fillMaxSize().background(colors.background).padding(paddingValues).padding(20.dp)
                 .verticalScroll(rememberScrollState())
         ) {
-            Text(knowledge.fullPath, fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(knowledge.fullPath, fontSize = 12.sp, color = colors.text3)
             Spacer(Modifier.height(12.dp))
 
             if (knowledge.formula.isNotEmpty()) {
                 Card(
-                    modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(12.dp),
-                    colors = CardDefaults.cardColors(containerColor = CardLightGray),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+                    modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(20.dp),
+                    colors = CardDefaults.cardColors(containerColor = colors.surface2),
+                    border = BorderStroke(1.dp, colors.line),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
                 ) {
                     MarkdownWebView(
                         markdown = "$$${knowledge.formula}$$",
@@ -487,11 +606,16 @@ private fun KnowledgeDetailContent(knowledge: KnowledgeEntity, onBack: () -> Uni
             }
 
             if (knowledge.content.isNotEmpty()) {
-                Card(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(12.dp)) {
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(20.dp),
+                    colors = CardDefaults.cardColors(containerColor = colors.surface),
+                    border = BorderStroke(1.dp, colors.line),
+                ) {
                     Column(modifier = Modifier.padding(14.dp)) {
-                        Text("详细说明", fontWeight = FontWeight.SemiBold, fontSize = 15.sp, color = DetailTitleBlue)
+                        Text("详细说明", fontWeight = FontWeight.SemiBold, fontSize = 15.sp, color = colors.primary)
                         Spacer(Modifier.height(8.dp))
-                        HorizontalDivider(color = DividerGray, thickness = 1.dp)
+                        HorizontalDivider(color = colors.line, thickness = 1.dp)
                         Spacer(Modifier.height(8.dp))
                         MarkdownWebView(
                             markdown = knowledge.content,

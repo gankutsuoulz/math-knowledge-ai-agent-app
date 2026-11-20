@@ -1,6 +1,7 @@
 package com.mathkatex.verify.screens
 
 import android.graphics.Bitmap
+import com.mathkatex.verify.util.LogFileManager
 import android.graphics.Matrix
 import android.net.Uri
 import androidx.compose.foundation.Canvas
@@ -40,15 +41,22 @@ fun ImageEditScreen(
     onConfirm: (Bitmap) -> Unit,
     onCancel: () -> Unit
 ) {
+    LogFileManager.log("ImageEdit", "ImageEditScreen entered, bitmap=${originalBitmap.width}x${originalBitmap.height}")
     var rotation by remember { mutableStateOf(0) } // 0, 1, 2, 3 表示90度倍数
     var containerSize by remember { mutableStateOf(IntSize.Zero) }
     
     // 旋转后的位图
-    var workingBitmap by remember { mutableStateOf(originalBitmap) }
+    var workingBitmap by remember(originalBitmap) { mutableStateOf(originalBitmap) }
     
-    // 更新工作位图
-    LaunchedEffect(rotation) {
-        workingBitmap = rotateBitmap(originalBitmap, rotation * 90f)
+    // 更新工作位图 — 加 key 防重组风暴，旋转后回收旧 Bitmap
+    LaunchedEffect(originalBitmap, rotation) {
+        val oldBmp = workingBitmap
+        val newBmp = rotateBitmap(originalBitmap, rotation * 90f)
+        workingBitmap = newBmp
+        if (oldBmp != originalBitmap && oldBmp != newBmp) {
+            LogFileManager.log("ImageEdit", "rotateBitmap: recycling old bitmap ${oldBmp.width}x${oldBmp.height}")
+            oldBmp.recycle()
+        }
     }
     
     // 计算显示信息
@@ -78,7 +86,13 @@ fun ImageEditScreen(
                     TextButton(
                         onClick = {
                             displayInfo?.let { info ->
-                                val cropped = cropBitmap(workingBitmap, cropNormalized, info)
+                                LogFileManager.log("ImageEdit", "onConfirm: workingBitmap=${workingBitmap.width}x${workingBitmap.height}, cropNormalized=$cropNormalized")
+                            val cropped = try {
+                                cropBitmap(workingBitmap, cropNormalized, info)
+                            } catch (e: Exception) {
+                                LogFileManager.logError("ImageEdit", "cropBitmap failed", e)
+                                return@TextButton
+                            }
                                 onConfirm(cropped)
                             }
                         }
@@ -441,11 +455,27 @@ fun ImageWithCropOverlay(
  * 旋转位图
  */
 fun rotateBitmap(source: Bitmap, degrees: Float): Bitmap {
+    LogFileManager.log("ImageEdit", "rotateBitmap: degrees=$degrees, src=${source.width}x${source.height}")
     if (degrees == 0f) return source
     
     val matrix = Matrix()
     matrix.postRotate(degrees)
-    return Bitmap.createBitmap(source, 0, 0, source.width, source.height, matrix, true)
+    val newWidth = if (degrees % 180f != 0f) source.height else source.width
+    val newHeight = if (degrees % 180f != 0f) source.width else source.height
+    LogFileManager.log("ImageEdit", "rotateBitmap: new size=${newWidth}x${newHeight}")
+    return try {
+        val result = Bitmap.createBitmap(source, 0, 0, source.width, source.height, matrix, true)
+        LogFileManager.log("ImageEdit", "rotateBitmap: success, result=${result.width}x${result.height}")
+        result
+    } catch (e: IllegalArgumentException) {
+        LogFileManager.logError("ImageEdit", "rotateBitmap: createBitmap failed with old size, using fallback", e)
+        val result = Bitmap.createBitmap(newWidth, newHeight, Bitmap.Config.ARGB_8888)
+        val canvas = android.graphics.Canvas(result)
+        canvas.drawBitmap(source, matrix, null)
+        canvas.setBitmap(null)
+        LogFileManager.log("ImageEdit", "rotateBitmap: fallback success, result=${result.width}x${result.height}")
+        result
+    }
 }
 
 /**

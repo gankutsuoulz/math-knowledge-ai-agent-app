@@ -4,33 +4,44 @@ plugins {
     id 'com.google.devtools.ksp' version '1.9.22-1.0.17'
 }
 
-// 自动版本号递增
-def computeVersionName() {
-    if (project.hasProperty('buildVersion')) {
-        return project.property('buildVersion')
-    }
-    def versionFile = file('version.properties')
-    def versionProps = new Properties()
-    if (versionFile.exists()) {
-        versionFile.withInputStream { versionProps.load(it) }
-    }
-    def major = versionProps.getProperty('VERSION_MAJOR', '1').toInteger()
-    def minor = versionProps.getProperty('VERSION_MINOR', '1').toInteger()
-    def patch = versionProps.getProperty('VERSION_PATCH', '0').toInteger() + 1
-    versionProps.setProperty('VERSION_MAJOR', major.toString())
-    versionProps.setProperty('VERSION_MINOR', minor.toString())
-    versionProps.setProperty('VERSION_PATCH', patch.toString())
-    versionFile.parentFile.mkdirs()
-    versionFile.withOutputStream { versionProps.store(it, 'Auto-incremented by build') }
-    return "${major}.${minor}.${patch}"
+// ---------------------------------------------------------------------------
+// 版本号：构建只读 version.properties，绝不改写。
+// 发新版本时显式执行 ./gradlew bumpVersion（或 -PbuildVersion/-PbuildVersionCode）。
+// ---------------------------------------------------------------------------
+def versionFile = file('version.properties')
+def versionProps = new Properties()
+if (versionFile.exists()) {
+    versionFile.withInputStream { versionProps.load(it) }
 }
+def versionMajor = versionProps.getProperty('VERSION_MAJOR', '1').toInteger()
+def versionMinor = versionProps.getProperty('VERSION_MINOR', '1').toInteger()
+def versionPatch = versionProps.getProperty('VERSION_PATCH', '0').toInteger()
+def versionNameValue = project.hasProperty('buildVersion')
+        ? project.property('buildVersion').toString()
+        : "${versionMajor}.${versionMinor}.${versionPatch}"
+def versionCodeValue = project.hasProperty('buildVersionCode')
+        ? project.property('buildVersionCode').toString().toInteger()
+        : versionProps.getProperty('VERSION_CODE', '1').toInteger()
 
-def computeVersionCode() {
-    if (project.hasProperty('buildVersionCode')) {
-        return project.property('buildVersionCode').toInteger()
-    }
-    return (System.currentTimeMillis() / 1000).toInteger()
+// ---------------------------------------------------------------------------
+// 签名：口令只从 local.properties / 环境变量读取，不再写死在仓库里。
+// local.properties 需要：
+//   RELEASE_STORE_FILE=app/keystore.jks
+//   RELEASE_STORE_PASSWORD=...
+//   RELEASE_KEY_ALIAS=...
+//   RELEASE_KEY_PASSWORD=...
+// ---------------------------------------------------------------------------
+def localProps = new Properties()
+def localPropsFile = rootProject.file('local.properties')
+if (localPropsFile.exists()) {
+    localPropsFile.withInputStream { localProps.load(it) }
 }
+def secret = { key, envName -> localProps.getProperty(key) ?: System.getenv(envName) }
+def ksStorePath = secret('RELEASE_STORE_FILE', 'RELEASE_STORE_FILE')
+def ksStorePassword = secret('RELEASE_STORE_PASSWORD', 'RELEASE_STORE_PASSWORD')
+def ksKeyAlias = secret('RELEASE_KEY_ALIAS', 'RELEASE_KEY_ALIAS')
+def ksKeyPassword = secret('RELEASE_KEY_PASSWORD', 'RELEASE_KEY_PASSWORD')
+def hasSigning = ksStorePath && ksStorePassword && ksKeyAlias && ksKeyPassword
 
 android {
     applicationVariants.configureEach { variant ->
@@ -43,10 +54,12 @@ android {
 
     signingConfigs {
         release {
-            storeFile file('keystore.jks')
-            storePassword 'Reading@2026'
-            keyAlias 'reading'
-            keyPassword 'Reading@2026'
+            if (hasSigning) {
+                storeFile rootProject.file(ksStorePath)
+                storePassword ksStorePassword
+                keyAlias ksKeyAlias
+                keyPassword ksKeyPassword
+            }
         }
     }
 
@@ -54,8 +67,8 @@ android {
         applicationId "com.mathkatex.verify"
         minSdk 26
         targetSdk 34
-        versionCode computeVersionCode()
-        versionName computeVersionName()
+        versionCode versionCodeValue
+        versionName versionNameValue
 
         vectorDrawables {
             useSupportLibrary true
@@ -69,7 +82,9 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
         debug {
-            signingConfig signingConfigs.release
+            // 本机配置了 release 签名才沿用，否则用系统 debug key；
+            // 不再把 release 口令带进日常构建。
+            if (hasSigning) signingConfig signingConfigs.release
         }
     }
 
@@ -94,6 +109,20 @@ android {
         resources {
             excludes += '/META-INF/{AL2.0,LGPL2.1}'
         }
+    }
+}
+
+// 只在你明确执行 ./gradlew bumpVersion 时改版本文件
+tasks.register('bumpVersion') {
+    doLast {
+        def p = new Properties()
+        if (versionFile.exists()) versionFile.withInputStream { p.load(it) }
+        def patch = p.getProperty('VERSION_PATCH', '0').toInteger() + 1
+        def code = p.getProperty('VERSION_CODE', '1').toInteger() + 1
+        p.setProperty('VERSION_PATCH', patch.toString())
+        p.setProperty('VERSION_CODE', code.toString())
+        versionFile.withOutputStream { p.store(it, 'Bumped by ./gradlew bumpVersion') }
+        println "version -> ${p.getProperty('VERSION_MAJOR')}.${p.getProperty('VERSION_MINOR')}.${patch} (${code})"
     }
 }
 

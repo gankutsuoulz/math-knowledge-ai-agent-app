@@ -15,8 +15,12 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.CameraAlt
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material3.IconButton
 import androidx.compose.material.icons.filled.Photo
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Save
@@ -38,6 +42,7 @@ import androidx.core.content.FileProvider
 import com.mathkatex.verify.screens.MarkdownWebView
 import com.mathkatex.verify.data.SettingsManager
 import com.mathkatex.verify.data.service.LLMService
+import com.mathkatex.verify.ui.theme.LocalAppColors
 import com.mathkatex.verify.util.LogFileManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -65,7 +70,8 @@ data class SolveResult(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PhotoSolveScreen(
-    onNavigateToImageEdit: ((Bitmap) -> Unit)? = null
+    onNavigateToImageEdit: ((Bitmap) -> Unit)? = null,
+    onBack: () -> Unit = {},
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
@@ -160,18 +166,26 @@ fun PhotoSolveScreen(
         }
     }
 
+    val colors = LocalAppColors.current
     Scaffold(
+        containerColor = colors.background,
         topBar = {
             TopAppBar(
                 title = {
                     Text(
-                        text = "拍照解题 [F-01]",
-                        fontWeight = FontWeight.Bold
+                        text = "解题辅导",
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 16.sp
                     )
                 },
+                navigationIcon = {
+                    IconButton(onClick = { onBack() }) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "返回")
+                    }
+                },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                    containerColor = colors.background,
+                    titleContentColor = colors.text
                 )
             )
         }
@@ -353,7 +367,9 @@ fun PhotoSolveScreen(
                             val usePrompt = if (SettingsManager.photoPromptEnabled) {
                                 SettingsManager.photoPrompt
                             } else {
-                                "请仔细分析这张图片中的数学题目，给出完整的解题步骤和最终答案。"
+                                "请先识别图片中的数学题目和用户的解答。若解答正确，简短肯定并给出关键步骤；" +
+                                    "若有误或未完成，不要直接给最终答案，而是：1) 指出卡在哪一步；2) 列出涉及的知识点；" +
+                                    "3) 给出三步以内的引导问题。用简洁中文和 LaTeX 公式。"
                             }
 
                             val apiResult = llmService.analyzeMathImage(
@@ -458,42 +474,51 @@ fun PhotoSolveScreen(
                     result?.let { solveResult ->
                         Card(
                             modifier = Modifier.fillMaxWidth(),
-                            colors = CardDefaults.cardColors(
-                                containerColor = Color(0xFFF5F5F5)
-                            ),
-                            shape = RoundedCornerShape(12.dp),
-                            elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+                            colors = CardDefaults.cardColors(containerColor = colors.surface),
+                            shape = RoundedCornerShape(20.dp),
+                            border = BorderStroke(1.dp, colors.line),
+                            elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
                         ) {
                             Column(
                                 modifier = Modifier.padding(16.dp)
                             ) {
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
                                     Icon(
-                                        imageVector = Icons.Default.Save,
+                                        imageVector = Icons.Default.CheckCircle,
                                         contentDescription = null,
-                                        tint = Color(0xFF1565C0),
-                                        modifier = Modifier.size(20.dp)
+                                        tint = colors.success,
+                                        modifier = Modifier.size(18.dp)
                                     )
-                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Spacer(modifier = Modifier.width(7.dp))
                                     Text(
-                                        text = "识别结果",
-                                        fontSize = 16.sp,
+                                        text = "已识别题目",
+                                        fontSize = 11.sp,
                                         fontWeight = FontWeight.SemiBold,
-                                        color = Color(0xFF212121)
+                                        color = colors.success
                                     )
                                 }
-
-                                Spacer(modifier = Modifier.height(4.dp))
-                                HorizontalDivider(color = Color(0xFFE0E0E0), thickness = 1.dp)
-                                Spacer(modifier = Modifier.height(8.dp))
+                                Spacer(Modifier.height(10.dp))
+                                Text(
+                                    text = "先别急着看答案",
+                                    fontSize = 15.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = colors.text
+                                )
+                                Spacer(Modifier.height(4.dp))
+                                Text(
+                                    text = "顺着下面的提示想，卡住了再往下看",
+                                    fontSize = 11.5.sp,
+                                    color = colors.text3
+                                )
+                                Spacer(Modifier.height(10.dp))
+                                HorizontalDivider(color = colors.line, thickness = 1.dp)
+                                Spacer(Modifier.height(6.dp))
 
                                 MarkdownWebView(
                                     markdown = solveResult.rawResponse,
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .padding(bottom = 16.dp)
+                                        .padding(bottom = 12.dp)
                                         .heightIn(min = 100.dp)
                                 )
 
@@ -512,7 +537,7 @@ fun PhotoSolveScreen(
                                             result = null
                                         },
                                         modifier = Modifier.weight(1f),
-                                        shape = RoundedCornerShape(8.dp)
+                                        shape = RoundedCornerShape(14.dp)
                                     ) {
                                         Icon(
                                             imageVector = Icons.Default.Refresh,
@@ -520,15 +545,15 @@ fun PhotoSolveScreen(
                                             modifier = Modifier.size(18.dp)
                                         )
                                         Spacer(modifier = Modifier.width(6.dp))
-                                        Text("重新拍照", color = Color(0xFF424242))
+                                        Text("重新拍照", color = colors.text2)
                                     }
 
                                     Button(
                                         onClick = { /* TODO: 收藏功能，后续实现 */ },
                                         modifier = Modifier.weight(1f),
-                                        shape = RoundedCornerShape(8.dp),
+                                        shape = RoundedCornerShape(14.dp),
                                         colors = ButtonDefaults.buttonColors(
-                                            containerColor = Color(0xFF1565C0)
+                                            containerColor = colors.primary
                                         )
                                     ) {
                                         Icon(

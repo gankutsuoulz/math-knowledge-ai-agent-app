@@ -1,0 +1,496 @@
+package com.mathkatex.verify.screens
+
+import android.graphics.Bitmap
+import com.mathkatex.verify.util.LogFileManager
+import android.graphics.Matrix
+import android.net.Uri
+import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.IntSize
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import kotlin.math.min
+
+/**
+ * 图片裁剪和旋转界面
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun ImageEditScreen(
+    originalBitmap: Bitmap,
+    onConfirm: (Bitmap) -> Unit,
+    onCancel: () -> Unit
+) {
+    LogFileManager.log("ImageEdit", "ImageEditScreen entered, bitmap=${originalBitmap.width}x${originalBitmap.height}")
+    var rotation by remember { mutableStateOf(0) } // 0, 1, 2, 3 表示90度倍数
+    var containerSize by remember { mutableStateOf(IntSize.Zero) }
+    
+    // 旋转后的位图
+    var workingBitmap by remember { mutableStateOf(originalBitmap) }
+    
+    // 更新工作位图
+    LaunchedEffect(rotation) {
+        workingBitmap = rotateBitmap(originalBitmap, rotation * 90f)
+    }
+    
+    // 计算显示信息
+    var displayInfo by remember { mutableStateOf<DisplayInfo?>(null) }
+    
+    LaunchedEffect(workingBitmap, containerSize) {
+        if (containerSize.width > 0 && containerSize.height > 0) {
+            displayInfo = calculateDisplayInfo(workingBitmap, containerSize)
+        }
+    }
+    
+    // 裁剪区域（相对于显示区域的比例，0-1）
+    var cropNormalized by remember { 
+        mutableStateOf(Rect(0.05f, 0.05f, 0.95f, 0.95f)) // 默认留5%边距
+    }
+    
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text("裁剪图片", fontWeight = androidx.compose.ui.text.font.FontWeight.Bold) },
+                navigationIcon = {
+                    IconButton(onClick = onCancel) {
+                        Icon(Icons.Default.Close, contentDescription = "取消")
+                    }
+                },
+                actions = {
+                    TextButton(
+                        onClick = {
+                            displayInfo?.let { info ->
+                                LogFileManager.log("ImageEdit", "onConfirm: workingBitmap=${workingBitmap.width}x${workingBitmap.height}, cropNormalized=$cropNormalized")
+                            val cropped = try {
+                                cropBitmap(workingBitmap, cropNormalized, info)
+                            } catch (e: Exception) {
+                                LogFileManager.logError("ImageEdit", "cropBitmap failed", e)
+                                return@TextButton
+                            }
+                                onConfirm(cropped)
+                            }
+                        }
+                    ) {
+                        Icon(Icons.Default.Check, contentDescription = null)
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text("完成")
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.primaryContainer
+                )
+            )
+        }
+    ) { paddingValues ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+                .background(Color.Black)
+        ) {
+            // 图片显示和裁剪区域
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxWidth()
+                    .onSizeChanged { containerSize = it }
+            ) {
+                if (displayInfo != null && containerSize.width > 0) {
+                    ImageWithCropOverlay(
+                        bitmap = workingBitmap,
+                        displayInfo = displayInfo!!,
+                        cropNormalized = cropNormalized,
+                        onCropChanged = { newCrop -> cropNormalized = newCrop }
+                    )
+                } else {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator(color = Color.White)
+                    }
+                }
+            }
+            
+            // 底部操作栏
+            Surface(
+                modifier = Modifier.fillMaxWidth(),
+                color = Color(0xFF1E1E1E)
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    horizontalArrangement = Arrangement.SpaceEvenly,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    // 左旋转
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        IconButton(
+                            onClick = { rotation = (rotation - 1 + 4) % 4 },
+                            modifier = Modifier
+                                .size(56.dp)
+                                .background(Color(0xFF3A3A3A), RoundedCornerShape(12.dp))
+                        ) {
+                            Icon(
+                                Icons.Default.RotateLeft,
+                                contentDescription = "左旋转90度",
+                                tint = Color.White,
+                                modifier = Modifier.size(28.dp)
+                            )
+                        }
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = "左旋转",
+                            color = Color.White,
+                            fontSize = 12.sp
+                        )
+                    }
+                    
+                    // 右旋转
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        IconButton(
+                            onClick = { rotation = (rotation + 1) % 4 },
+                            modifier = Modifier
+                                .size(56.dp)
+                                .background(Color(0xFF3A3A3A), RoundedCornerShape(12.dp))
+                        ) {
+                            Icon(
+                                Icons.Default.RotateRight,
+                                contentDescription = "右旋转90度",
+                                tint = Color.White,
+                                modifier = Modifier.size(28.dp)
+                            )
+                        }
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = "右旋转",
+                            color = Color.White,
+                            fontSize = 12.sp
+                        )
+                    }
+                    
+                    // 重置
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        IconButton(
+                            onClick = { 
+                                rotation = 0
+                                cropNormalized = Rect(0.05f, 0.05f, 0.95f, 0.95f)
+                            },
+                            modifier = Modifier
+                                .size(56.dp)
+                                .background(Color(0xFF3A3A3A), RoundedCornerShape(12.dp))
+                        ) {
+                            Icon(
+                                Icons.Default.Refresh,
+                                contentDescription = "重置",
+                                tint = Color.White,
+                                modifier = Modifier.size(28.dp)
+                            )
+                        }
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = "重置",
+                            color = Color.White,
+                            fontSize = 12.sp
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+/**
+ * 显示信息
+ */
+data class DisplayInfo(
+    val displayRect: Rect,      // 位图在容器中的显示区域
+    val scale: Float,           // 缩放比例
+    val offsetX: Float,        // X偏移
+    val offsetY: Float         // Y偏移
+)
+
+/**
+ * 计算位图显示信息
+ */
+fun calculateDisplayInfo(
+    bitmap: Bitmap,
+    containerSize: IntSize
+): DisplayInfo {
+    val containerWidth = containerSize.width.toFloat()
+    val containerHeight = containerSize.height.toFloat()
+    
+    // 计算缩放比例，使图片适应容器
+    val scaleX = containerWidth / bitmap.width
+    val scaleY = containerHeight / bitmap.height
+    val scale = min(scaleX, scaleY) * 0.9f // 留5%边距
+    
+    val displayWidth = bitmap.width * scale
+    val displayHeight = bitmap.height * scale
+    
+    val offsetX = (containerWidth - displayWidth) / 2
+    val offsetY = (containerHeight - displayHeight) / 2
+    
+    return DisplayInfo(
+        displayRect = Rect(offsetX, offsetY, offsetX + displayWidth, offsetY + displayHeight),
+        scale = scale,
+        offsetX = offsetX,
+        offsetY = offsetY
+    )
+}
+
+/**
+ * 带裁剪覆盖层的图片
+ */
+@Composable
+fun ImageWithCropOverlay(
+    bitmap: Bitmap,
+    displayInfo: DisplayInfo,
+    cropNormalized: Rect,
+    onCropChanged: (Rect) -> Unit
+) {
+    val density = LocalDensity.current
+    val handleRadius = with(density) { 16.dp.toPx() }
+    val minCropPercent = 0.1f // 最小裁剪区域为10%
+    
+    // 裁剪边框颜色
+    val cropColor = Color.White
+    val overlayColor = Color.Black.copy(alpha = 0.6f)
+    
+    // 计算裁剪区域像素坐标
+    val cropPixelRect = remember(cropNormalized, displayInfo) {
+        Rect(
+            left = displayInfo.displayRect.left + displayInfo.displayRect.width * cropNormalized.left,
+            top = displayInfo.displayRect.top + displayInfo.displayRect.height * cropNormalized.top,
+            right = displayInfo.displayRect.left + displayInfo.displayRect.width * cropNormalized.right,
+            bottom = displayInfo.displayRect.top + displayInfo.displayRect.height * cropNormalized.bottom
+        )
+    }
+    
+    Box(modifier = Modifier.fillMaxSize()) {
+        // 图片
+        Image(
+            bitmap = bitmap.asImageBitmap(),
+            contentDescription = "待裁剪图片",
+            modifier = Modifier.fillMaxSize(),
+            contentScale = ContentScale.Fit
+        )
+        
+        // 裁剪覆盖层和边框
+        Canvas(
+            modifier = Modifier
+                .fillMaxSize()
+                .pointerInput(Unit) {
+                    detectDragGestures(
+                        onDragStart = { offset ->
+                            // 判断是否在裁剪区域边缘附近
+                        },
+                        onDrag = { change, dragAmount ->
+                            change.consume()
+                            
+                            // 计算新的裁剪区域（归一化坐标）
+                            val displayWidth = displayInfo.displayRect.width
+                            val displayHeight = displayInfo.displayRect.height
+                            
+                            // 计算当前裁剪区域的像素值
+                            val currentLeft = displayInfo.displayRect.left + displayWidth * cropNormalized.left
+                            val currentTop = displayInfo.displayRect.top + displayHeight * cropNormalized.top
+                            val currentRight = displayInfo.displayRect.left + displayWidth * cropNormalized.right
+                            val currentBottom = displayInfo.displayRect.top + displayHeight * cropNormalized.bottom
+                            
+                            // 计算新的左边界
+                            val minLeft = displayInfo.displayRect.left + displayWidth * minCropPercent
+                            val maxLeft = currentRight - displayWidth * minCropPercent
+                            val newLeft = (currentLeft + dragAmount.x).coerceIn(minLeft, maxLeft)
+                            
+                            // 计算新的上边界
+                            val minTop = displayInfo.displayRect.top + displayHeight * minCropPercent
+                            val maxTop = currentBottom - displayHeight * minCropPercent
+                            val newTop = (currentTop + dragAmount.y).coerceIn(minTop, maxTop)
+                            
+                            // 计算新的右边界
+                            val minRight = newLeft + displayWidth * minCropPercent
+                            val maxRight = displayInfo.displayRect.right - displayWidth * minCropPercent
+                            val newRight = (currentRight + dragAmount.x).coerceIn(minRight, maxRight)
+                            
+                            // 计算新的下边界
+                            val minBottom = newTop + displayHeight * minCropPercent
+                            val maxBottom = displayInfo.displayRect.bottom - displayHeight * minCropPercent
+                            val newBottom = (currentBottom + dragAmount.y).coerceIn(minBottom, maxBottom)
+                            
+                            // 转换回归一化坐标
+                            val newNormalized = Rect(
+                                left = (newLeft - displayInfo.displayRect.left) / displayWidth,
+                                top = (newTop - displayInfo.displayRect.top) / displayHeight,
+                                right = (newRight - displayInfo.displayRect.left) / displayWidth,
+                                bottom = (newBottom - displayInfo.displayRect.top) / displayHeight
+                            )
+                            
+                            onCropChanged(newNormalized)
+                        },
+                        onDragEnd = { }
+                    )
+                }
+        ) {
+            val displayRect = displayInfo.displayRect
+            
+            // 绘制半透明遮罩（裁剪区域外）
+            // 上方
+            drawRect(
+                color = overlayColor,
+                topLeft = Offset.Zero,
+                size = androidx.compose.ui.geometry.Size(size.width, displayRect.top)
+            )
+            // 下方
+            drawRect(
+                color = overlayColor,
+                topLeft = Offset(0f, displayRect.bottom),
+                size = androidx.compose.ui.geometry.Size(size.width, size.height - displayRect.bottom)
+            )
+            // 左侧
+            drawRect(
+                color = overlayColor,
+                topLeft = Offset(0f, displayRect.top),
+                size = androidx.compose.ui.geometry.Size(displayRect.left, displayRect.height)
+            )
+            // 右侧
+            drawRect(
+                color = overlayColor,
+                topLeft = Offset(displayRect.right, displayRect.top),
+                size = androidx.compose.ui.geometry.Size(size.width - displayRect.right, displayRect.height)
+            )
+            
+            // 绘制裁剪边框
+            drawRect(
+                color = cropColor,
+                topLeft = Offset(cropPixelRect.left, cropPixelRect.top),
+                size = androidx.compose.ui.geometry.Size(cropPixelRect.width, cropPixelRect.height),
+                style = Stroke(width = 2f)
+            )
+            
+            // 绘制网格线
+            val thirdWidth = cropPixelRect.width / 3
+            val thirdHeight = cropPixelRect.height / 3
+            
+            // 垂直网格线
+            for (i in 1..2) {
+                drawLine(
+                    color = cropColor.copy(alpha = 0.4f),
+                    start = Offset(cropPixelRect.left + thirdWidth * i, cropPixelRect.top),
+                    end = Offset(cropPixelRect.left + thirdWidth * i, cropPixelRect.bottom),
+                    strokeWidth = 1f
+                )
+            }
+            
+            // 水平网格线
+            for (i in 1..2) {
+                drawLine(
+                    color = cropColor.copy(alpha = 0.4f),
+                    start = Offset(cropPixelRect.left, cropPixelRect.top + thirdHeight * i),
+                    end = Offset(cropPixelRect.right, cropPixelRect.top + thirdHeight * i),
+                    strokeWidth = 1f
+                )
+            }
+            
+            // 绘制四角把手
+            val corners = listOf(
+                Offset(cropPixelRect.left, cropPixelRect.top),
+                Offset(cropPixelRect.right, cropPixelRect.top),
+                Offset(cropPixelRect.left, cropPixelRect.bottom),
+                Offset(cropPixelRect.right, cropPixelRect.bottom)
+            )
+            
+            corners.forEach { corner ->
+                // 外圈
+                drawCircle(
+                    color = cropColor,
+                    radius = handleRadius,
+                    center = corner
+                )
+                // 内圈
+                drawCircle(
+                    color = Color(0xFF4CAF50),
+                    radius = handleRadius * 0.5f,
+                    center = corner
+                )
+            }
+        }
+    }
+}
+
+/**
+ * 旋转位图
+ */
+fun rotateBitmap(source: Bitmap, degrees: Float): Bitmap {
+    LogFileManager.log("ImageEdit", "rotateBitmap: degrees=$degrees, src=${source.width}x${source.height}")
+    if (degrees == 0f) return source
+    
+    val matrix = Matrix()
+    matrix.postRotate(degrees)
+    val newWidth = if (degrees % 180f != 0f) source.height else source.width
+    val newHeight = if (degrees % 180f != 0f) source.width else source.height
+    LogFileManager.log("ImageEdit", "rotateBitmap: new size=${newWidth}x${newHeight}")
+    return try {
+        val result = Bitmap.createBitmap(source, 0, 0, source.width, source.height, matrix, true)
+        LogFileManager.log("ImageEdit", "rotateBitmap: success, result=${result.width}x${result.height}")
+        result
+    } catch (e: IllegalArgumentException) {
+        LogFileManager.logError("ImageEdit", "rotateBitmap: createBitmap failed with old size, using fallback", e)
+        val result = Bitmap.createBitmap(newWidth, newHeight, Bitmap.Config.ARGB_8888)
+        val canvas = android.graphics.Canvas(result)
+        canvas.drawBitmap(source, matrix, null)
+        canvas.setBitmap(null)
+        LogFileManager.log("ImageEdit", "rotateBitmap: fallback success, result=${result.width}x${result.height}")
+        result
+    }
+}
+
+/**
+ * 裁剪位图
+ */
+fun cropBitmap(
+    source: Bitmap,
+    cropNormalized: Rect,
+    displayInfo: DisplayInfo
+): Bitmap {
+    // 从归一化坐标计算像素坐标
+    // displayRect.width 是显示宽度，cropNormalized.width 是比例
+    val cropWidthPx = displayInfo.displayRect.width * cropNormalized.width / displayInfo.scale
+    val cropHeightPx = displayInfo.displayRect.height * cropNormalized.height / displayInfo.scale
+    val cropLeftPx = displayInfo.displayRect.width * cropNormalized.left / displayInfo.scale
+    val cropTopPx = displayInfo.displayRect.height * cropNormalized.top / displayInfo.scale
+    
+    val left = cropLeftPx.toInt().coerceIn(0, (source.width - cropWidthPx.toInt()).coerceAtLeast(1))
+    val top = cropTopPx.toInt().coerceIn(0, (source.height - cropHeightPx.toInt()).coerceAtLeast(1))
+    val width = cropWidthPx.toInt().coerceIn(1, source.width - left)
+    val height = cropHeightPx.toInt().coerceIn(1, source.height - top)
+    
+    return Bitmap.createBitmap(source, left, top, width, height)
+}

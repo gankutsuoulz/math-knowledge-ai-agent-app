@@ -1,0 +1,5 @@
+.audit/
+.avd/
+.buildfix-backup-*/
+shots/
+tmp/
