@@ -1,6 +1,7 @@
 package com.mathkatex.verify.screens
 
 import android.graphics.Bitmap
+import android.graphics.Matrix
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -9,6 +10,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.RotateRight
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -52,6 +54,8 @@ fun RegionSelectScreen(
 ) {
     val colors = LocalAppColors.current
     val scope = rememberCoroutineScope()
+    // 手动转正：EXIF 缺失时（如截图横放）用户可一键旋转
+    var workingBitmap by remember { mutableStateOf(originalBitmap) }
     var mode by remember { mutableStateOf(RegionMode.LASSO) }
     val shapes = remember { mutableStateListOf<RegionShape>() }
     var draftRect by remember { mutableStateOf<Pair<Offset, Offset>?>(null) }
@@ -59,8 +63,8 @@ fun RegionSelectScreen(
     var container by remember { mutableStateOf(IntSize.Zero) }
     var busy by remember { mutableStateOf(false) }
 
-    val imgW = originalBitmap.width.toFloat()
-    val imgH = originalBitmap.height.toFloat()
+    val imgW = workingBitmap.width.toFloat()
+    val imgH = workingBitmap.height.toFloat()
     val scale = if (container.width > 0 && container.height > 0)
         min(container.width / imgW, container.height / imgH) else 1f
     val dx = (container.width - imgW * scale) / 2f
@@ -90,6 +94,15 @@ fun RegionSelectScreen(
                         onClick = { if (shapes.isNotEmpty()) shapes.removeAt(shapes.lastIndex) },
                         enabled = shapes.isNotEmpty()
                     ) { Text("撤销", fontSize = 13.sp) }
+                    IconButton(onClick = {
+                        val matrix = Matrix().apply { postRotate(90f) }
+                        workingBitmap = Bitmap.createBitmap(
+                            workingBitmap, 0, 0, workingBitmap.width, workingBitmap.height, matrix, true
+                        )
+                        shapes.clear()
+                    }) {
+                        Icon(Icons.Default.RotateRight, contentDescription = "旋转 90°")
+                    }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = colors.background,
@@ -122,7 +135,7 @@ fun RegionSelectScreen(
                 contentAlignment = Alignment.Center
             ) {
                 Image(
-                    bitmap = originalBitmap.asImageBitmap(),
+                    bitmap = workingBitmap.asImageBitmap(),
                     contentDescription = "待圈选试卷",
                     modifier = Modifier.fillMaxSize(),
                     contentScale = ContentScale.Fit
@@ -304,7 +317,7 @@ fun RegionSelectScreen(
                         busy = true
                         scope.launch {
                             val masked = withContext(Dispatchers.IO) {
-                                RegionMasker.mask(originalBitmap, shapes.toList())
+                                RegionMasker.mask(workingBitmap, shapes.toList())
                             }
                             busy = false
                             onConfirm(masked)

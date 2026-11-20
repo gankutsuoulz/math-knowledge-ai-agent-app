@@ -4,11 +4,14 @@ import android.Manifest
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.Matrix
+import android.media.ExifInterface
 import android.net.Uri
 import android.util.Base64
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
@@ -42,6 +45,7 @@ import androidx.core.content.FileProvider
 import com.mathkatex.verify.screens.MarkdownWebView
 import com.mathkatex.verify.data.SettingsManager
 import com.mathkatex.verify.data.service.LLMService
+import com.google.gson.Gson
 import com.mathkatex.verify.ui.theme.LocalAppColors
 import com.mathkatex.verify.util.LogFileManager
 import kotlinx.coroutines.Dispatchers
@@ -55,6 +59,12 @@ private const val MAX_IMAGE_DIMENSION = 1600
 // JPEG 压缩质量
 private const val JPEG_QUALITY = 85
 
+/** 结构化输出提示词：App 直接渲染成卡片，解析失败再退回 Markdown。 */
+private const val STRUCTURED_SOLVE_PROMPT = """你是一位耐心的初中数学老师。请先识别图片中的数学题目，再检查学生的解答。
+只输出一个 JSON 对象，不要用代码块包裹，字段如下：
+{"verdict":"对/错/部分对/未完成","question":"题干（LaTeX）","knowledge":["知识点1","知识点2"],"stuck":"卡在哪一步（一句话）","hints":["引导问题1","引导问题2","引导问题3"],"steps":["完整解析步骤1","步骤2"],"answer":"最终答案（LaTeX）"}
+要求：hints 只给启发式追问，不直接给答案；steps/answer 可以晚点再看。"""
+
 sealed class PhotoSolveStep {
     object Idle : PhotoSolveStep()
     object ImageSelected : PhotoSolveStep()
@@ -63,8 +73,19 @@ sealed class PhotoSolveStep {
     object Error : PhotoSolveStep()
 }
 
+data class StructuredSolution(
+    val verdict: String? = null,
+    val question: String? = null,
+    val knowledge: List<String> = emptyList(),
+    val stuck: String? = null,
+    val hints: List<String> = emptyList(),
+    val steps: List<String> = emptyList(),
+    val answer: String? = null
+)
+
 data class SolveResult(
-    val rawResponse: String
+    val rawResponse: String,
+    val structured: StructuredSolution? = null
 )
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -83,6 +104,7 @@ fun PhotoSolveScreen(
     var showRegionSelect by remember { mutableStateOf(false) }
     var result by remember { mutableStateOf<SolveResult?>(null) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
+    var showFullSolution by remember { mutableStateOf(false) }
     var selectedBitmap by remember { mutableStateOf<Bitmap?>(null) }
     var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
     var hasCameraPermission by remember {
@@ -405,9 +427,7 @@ fun PhotoSolveScreen(
                             val usePrompt = if (SettingsManager.photoPromptEnabled) {
                                 SettingsManager.photoPrompt
                             } else {
-                                "请先识别图片中的数学题目和用户的解答。若解答正确，简短肯定并给出关键步骤；" +
-                                    "若有误或未完成，不要直接给最终答案，而是：1) 指出卡在哪一步；2) 列出涉及的知识点；" +
-                                    "3) 给出三步以内的引导问题。用简洁中文和 LaTeX 公式。"
+                                STRUCTURED_SOLVE_PROMPT
                             }
 
                             val apiResult = llmService.analyzeMathImage(
@@ -418,7 +438,10 @@ fun PhotoSolveScreen(
                             apiResult.fold(
                                 onSuccess = { response ->
                                     LogFileManager.logResponse("PhotoSolve", response)
-                                    result = SolveResult(rawResponse = response)
+                                    result = SolveResult(
+                                        rawResponse = response,
+                                        structured = parseStructuredSolution(response)
+                                    )
                                     currentStep = PhotoSolveStep.Completed
                                 },
                                 onFailure = { error ->
@@ -536,29 +559,120 @@ fun PhotoSolveScreen(
                                     )
                                 }
                                 Spacer(Modifier.height(10.dp))
-                                Text(
-                                    text = "先别急着看答案",
-                                    fontSize = 15.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    color = colors.text
-                                )
-                                Spacer(Modifier.height(4.dp))
-                                Text(
-                                    text = "顺着下面的提示想，卡住了再往下看",
-                                    fontSize = 11.5.sp,
-                                    color = colors.text3
-                                )
-                                Spacer(Modifier.height(10.dp))
-                                HorizontalDivider(color = colors.line, thickness = 1.dp)
-                                Spacer(Modifier.height(6.dp))
 
-                                MarkdownWebView(
-                                    markdown = solveResult.rawResponse,
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(bottom = 12.dp)
-                                        .heightIn(min = 100.dp)
-                                )
+                                val structured = solveResult.structured
+                                if (structured == null) {
+                                    Text(
+                                        text = "先别急着看答案",
+                                        fontSize = 15.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = colors.text
+                                    )
+                                    Spacer(Modifier.height(4.dp))
+                                    Text(
+                                        text = "顺着下面的提示想，卡住了再往下看",
+                                        fontSize = 11.5.sp,
+                                        color = colors.text3
+                                    )
+                                    Spacer(Modifier.height(10.dp))
+                                    HorizontalDivider(color = colors.line, thickness = 1.dp)
+                                    Spacer(Modifier.height(6.dp))
+                                    MarkdownWebView(
+                                        markdown = solveResult.rawResponse,
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(bottom = 12.dp)
+                                            .heightIn(min = 100.dp)
+                                    )
+                                } else {
+                                    Text(
+                                        text = structured.verdict ?: "已识别",
+                                        fontSize = 13.sp,
+                                        fontWeight = FontWeight.SemiBold,
+                                        color = if ((structured.verdict ?: "").contains("错")) colors.danger else colors.success
+                                    )
+                                    structured.question?.takeIf { it.isNotBlank() }?.let { q ->
+                                        Spacer(Modifier.height(8.dp))
+                                        MarkdownWebView(
+                                            markdown = q,
+                                            modifier = Modifier.fillMaxWidth().heightIn(min = 60.dp)
+                                        )
+                                    }
+                                    if (structured.knowledge.isNotEmpty()) {
+                                        Spacer(Modifier.height(10.dp))
+                                        Row(
+                                            modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
+                                            horizontalArrangement = Arrangement.spacedBy(6.dp)
+                                        ) {
+                                            structured.knowledge.take(6).forEach { k ->
+                                                Surface(
+                                                    color = colors.primarySoft,
+                                                    shape = RoundedCornerShape(999.dp)
+                                                ) {
+                                                    Text(
+                                                        text = k,
+                                                        fontSize = 11.sp,
+                                                        color = colors.primary,
+                                                        modifier = Modifier.padding(horizontal = 9.dp, vertical = 4.dp)
+                                                    )
+                                                }
+                                            }
+                                        }
+                                    }
+                                    structured.stuck?.takeIf { it.isNotBlank() }?.let { stuck ->
+                                        Spacer(Modifier.height(12.dp))
+                                        Text(
+                                            text = "卡点：${plainMath(stuck)}",
+                                            fontSize = 12.sp,
+                                            color = colors.text2,
+                                            lineHeight = 18.sp
+                                        )
+                                    }
+                                    if (structured.hints.isNotEmpty()) {
+                                        Spacer(Modifier.height(12.dp))
+                                        Text("引导问题", fontSize = 12.5.sp, fontWeight = FontWeight.Bold, color = colors.text)
+                                        structured.hints.forEachIndexed { index, hint ->
+                                            Row(modifier = Modifier.padding(top = 7.dp)) {
+                                                Text(
+                                                    text = "${index + 1}.",
+                                                    fontSize = 12.sp,
+                                                    color = colors.primary,
+                                                    fontWeight = FontWeight.SemiBold
+                                                )
+                                                Spacer(Modifier.width(6.dp))
+                                                Text(
+                                                    text = plainMath(hint),
+                                                    fontSize = 12.sp,
+                                                    color = colors.text2,
+                                                    lineHeight = 18.sp
+                                                )
+                                            }
+                                        }
+                                    }
+                                    if (structured.steps.isNotEmpty() || structured.answer != null) {
+                                        Spacer(Modifier.height(14.dp))
+                                        OutlinedButton(
+                                            onClick = { showFullSolution = !showFullSolution },
+                                            modifier = Modifier.fillMaxWidth(),
+                                            shape = RoundedCornerShape(14.dp)
+                                        ) {
+                                            Text(if (showFullSolution) "收起完整解析" else "看完整解析", fontSize = 13.sp)
+                                        }
+                                        if (showFullSolution) {
+                                            val md = buildString {
+                                                structured.steps.forEachIndexed { i, step ->
+                                                    append("**第 ${i + 1} 步**：").append(step).append("\n\n")
+                                                }
+                                                structured.answer?.let { append("**答案**：").append(it) }
+                                            }
+                                            Spacer(Modifier.height(8.dp))
+                                            MarkdownWebView(
+                                                markdown = md,
+                                                modifier = Modifier.fillMaxWidth().heightIn(min = 80.dp)
+                                            )
+                                        }
+                                    }
+                                }
 
                                 Spacer(modifier = Modifier.height(16.dp))
 
@@ -644,9 +758,31 @@ private fun decodeSampledBitmapFromUri(
         options.inJustDecodeBounds = false
 
         // 解码缩放后的位图
-        context.contentResolver.openInputStream(uri)?.use { input ->
+        val decoded = context.contentResolver.openInputStream(uri)?.use { input ->
             BitmapFactory.decodeStream(input, null, options)
+        } ?: return null
+
+        // 按 EXIF 方向转正（手机竖拍常见，否则题目会横躺）
+        val orientation = try {
+            context.contentResolver.openInputStream(uri)?.use { input ->
+                ExifInterface(input).getAttributeInt(
+                    ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL
+                )
+            } ?: ExifInterface.ORIENTATION_NORMAL
+        } catch (e: Exception) {
+            ExifInterface.ORIENTATION_NORMAL
         }
+        val rotation = when (orientation) {
+            ExifInterface.ORIENTATION_ROTATE_90 -> 90f
+            ExifInterface.ORIENTATION_ROTATE_180 -> 180f
+            ExifInterface.ORIENTATION_ROTATE_270 -> 270f
+            else -> 0f
+        }
+        if (rotation != 0f) {
+            val matrix = Matrix().apply { postRotate(rotation) }
+            Bitmap.createBitmap(decoded, 0, 0, decoded.width, decoded.height, matrix, true)
+                .also { if (it != decoded) decoded.recycle() }
+        } else decoded
     } catch (e: Exception) {
         LogFileManager.logError("PhotoSolve", "decodeSampledBitmapFromUri error: ${e.message}", e)
         null
@@ -680,4 +816,19 @@ private fun bitmapToBase64(bitmap: Bitmap): String {
     val byteArray = outputStream.toByteArray()
     val base64 = Base64.encodeToString(byteArray, Base64.NO_WRAP)
     return "data:image/jpeg;base64,$base64"
+}
+
+
+/** 解析模型的结构化 JSON；失败返回 null，UI 退回 Markdown 渲染。 */
+private fun parseStructuredSolution(raw: String): StructuredSolution? {
+    val text = raw.trim()
+    val start = text.indexOf('{')
+    val end = text.lastIndexOf('}')
+    if (start < 0 || end <= start) return null
+    return try {
+        Gson().fromJson(text.substring(start, end + 1), StructuredSolution::class.java)
+    } catch (e: Exception) {
+        LogFileManager.logError("PhotoSolve", "parseStructuredSolution failed: ${e.message}")
+        null
+    }
 }
