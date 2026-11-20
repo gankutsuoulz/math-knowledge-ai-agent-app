@@ -9,6 +9,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.ui.graphics.luminance
+import com.mathkatex.verify.ui.theme.LocalAppColors
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
@@ -235,11 +237,11 @@ private fun escapeHtmlAttr(text: String): String {
         .replace("'", "&#39;")
 }
 
-private fun buildFullHtml(markdown: String): String {
+private fun buildFullHtml(markdown: String, dark: Boolean = false): String {
     val htmlContent = markdownToHtml(markdown)
     return """
 <!DOCTYPE html>
-<html>
+<html class="${if (dark) "dark" else "light"}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -299,6 +301,17 @@ private fun buildFullHtml(markdown: String): String {
             background: #fafafa;
             border-radius: 6px;
         }
+        /* 深色模式：跟随 App 主题，避免黑底黑字 */
+        html.dark body { color: #E9EFF8; }
+        html.dark h1, html.dark h2 { color: #F3F7FC; }
+        html.dark h3, html.dark h4, html.dark h5, html.dark h6 { color: #E9EFF8; }
+        html.dark strong { color: #F3F7FC; }
+        html.dark code { background: #22314A; color: #8BB9FF; }
+        html.dark pre { background: #0B1220; color: #CDD6F4; }
+        html.dark blockquote { background: #17233A; border-left-color: #6EA8FF; }
+        html.dark hr { border-top-color: #22314A; }
+        html.dark a { color: #6EA8FF; }
+        html.dark .katex-display { background: #17233A; }
     </style>
 </head>
 <body>
@@ -372,7 +385,9 @@ fun MarkdownWebView(
     modifier: Modifier = Modifier,
     minHeight: Int = 100
 ) {
-    val html = remember(markdown) { buildFullHtml(markdown) }
+    val colors = LocalAppColors.current
+    val dark = colors.background.luminance() < 0.5f
+    val html = remember(markdown, dark) { buildFullHtml(markdown, dark) }
 
     AndroidView(
         factory = { context ->
