@@ -167,7 +167,7 @@ Room v4 迁移（保留现网数据）：
 - [x] P0 `knowledge_graph.json` v0.1：368 节点、382 条边（308 去重后入库）、760 别名、13 条专题路径（115 节点）、19 个题型模型、60/60 例题回填 knowledgeId；初一初二路径覆盖 107/113 节点。
 - [x] P1 Room v4：`knowledge_edges / aliases / paths / path_items / models` 表 + `examples.knowledgeId / practice_records.knowledgeId / knowledge_points.abilityLevel`；3→4 迁移在旧 release 数据库上验证通过（user_version=4，图谱导入成功）。
 - [x] P2 部分：知识详情接入「常考题型 / 前置 / 相关 / 相关例题 / 练这个知识点」；知识列表改为可点击卡片；练习按 knowledgeId 过滤并把 knowledgeId 写进练习记录；启动即灌例题。
-- [ ] P2 剩余：拍照结果 chips 点击进详情、错题/收藏挂知识点并跳转
+- [x] P2 剩余：拍照结果知识点 chips 可解析到知识库并弹卡（可去练习）；错题/收藏的知识点标签可跳到该知识点练习。
 - [ ] P3 掌握度/复习/今日三步
 
 ## 九、立即可做（本周）

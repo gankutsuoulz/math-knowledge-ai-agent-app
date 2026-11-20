@@ -147,6 +147,9 @@ fun MathAppNavigation() {
             composable(Screen.Mine.route) { MineScreen(navController) }
             composable(Screen.PhotoSolve.route) {
                 PhotoSolveScreen(
+                    onStartPractice = { id ->
+                        navController.navigate("${Screen.Practice.route}?knowledgeId=$id")
+                    },
                     onNavigateToImageEdit = { bitmap ->
                         imageEditSourceBitmap = bitmap
                         navController.navigate(Screen.ImageEdit.route)
@@ -188,8 +191,14 @@ fun MathAppNavigation() {
                 )
             }
             composable(Screen.Library.route) { LibraryScreen() }
-            composable(Screen.Favorites.route) { FavoritesScreen(onBack = { navController.popBackStack() }) }
-            composable(Screen.WrongBook.route) { WrongBookScreen(onBack = { navController.popBackStack() }) }
+            composable(Screen.Favorites.route) { FavoritesScreen(
+                    onBack = { navController.popBackStack() },
+                    onStartPractice = { id -> navController.navigate("${Screen.Practice.route}?knowledgeId=$id") }
+                ) }
+            composable(Screen.WrongBook.route) { WrongBookScreen(
+                    onBack = { navController.popBackStack() },
+                    onStartPractice = { id -> navController.navigate("${Screen.Practice.route}?knowledgeId=$id") }
+                ) }
             composable(Screen.Search.route) { SearchScreen() }
             composable(Screen.ErrorGuide.route) { ErrorGuideScreen() }
             composable(Screen.FormulaConvert.route) { FormulaConvertScreen() }

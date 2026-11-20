@@ -2,6 +2,7 @@ package com.mathkatex.verify.screens
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -49,6 +50,7 @@ private fun CollectionScreen(
     title: String,
     emptyText: String,
     onBack: () -> Unit,
+    onStartPractice: (String) -> Unit = {},
     load: suspend () -> List<ExampleEntity>,
 ) {
     val colors = LocalAppColors.current
@@ -134,7 +136,7 @@ private fun CollectionScreen(
 }
 
 @Composable
-fun FavoritesScreen(onBack: () -> Unit = {}) {
+fun FavoritesScreen(onBack: () -> Unit = {}, onStartPractice: (String) -> Unit = {}) {
     CollectionScreen(
         title = "我的收藏",
         emptyText = "还没有收藏的例题",
@@ -144,7 +146,7 @@ fun FavoritesScreen(onBack: () -> Unit = {}) {
 }
 
 @Composable
-fun WrongBookScreen(onBack: () -> Unit = {}) {
+fun WrongBookScreen(onBack: () -> Unit = {}, onStartPractice: (String) -> Unit = {}) {
     CollectionScreen(
         title = "错题本",
         emptyText = "还没有错题，去练习页试试",

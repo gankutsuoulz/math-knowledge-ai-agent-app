@@ -13,6 +13,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -44,6 +45,8 @@ import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import com.mathkatex.verify.screens.MarkdownWebView
 import com.mathkatex.verify.data.SettingsManager
+import com.mathkatex.verify.data.local.KnowledgeEntity
+import com.mathkatex.verify.data.local.KnowledgeRepository
 import com.mathkatex.verify.data.service.LLMService
 import com.google.gson.Gson
 import com.mathkatex.verify.ui.theme.LocalAppColors
@@ -92,6 +95,7 @@ data class SolveResult(
 @Composable
 fun PhotoSolveScreen(
     onNavigateToImageEdit: ((Bitmap) -> Unit)? = null,
+    onStartPractice: (String) -> Unit = {},
     onBack: () -> Unit = {},
 ) {
     val context = LocalContext.current
@@ -105,6 +109,7 @@ fun PhotoSolveScreen(
     var result by remember { mutableStateOf<SolveResult?>(null) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
     var showFullSolution by remember { mutableStateOf(false) }
+    var knowledgeDialog by remember { mutableStateOf<KnowledgeEntity?>(null) }
     var selectedBitmap by remember { mutableStateOf<Bitmap?>(null) }
     var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
     var hasCameraPermission by remember {
@@ -607,7 +612,13 @@ fun PhotoSolveScreen(
                                             structured.knowledge.take(6).forEach { k ->
                                                 Surface(
                                                     color = colors.primarySoft,
-                                                    shape = RoundedCornerShape(999.dp)
+                                                    shape = RoundedCornerShape(999.dp),
+                                                    modifier = Modifier.clickable {
+                                                        scope.launch {
+                                                            val id = KnowledgeRepository.resolveKnowledgeId(k)
+                                                            knowledgeDialog = id?.let { KnowledgeRepository.getById(it) }
+                                                        }
+                                                    }
                                                 ) {
                                                     Text(
                                                         text = k,
@@ -713,6 +724,34 @@ fun PhotoSolveScreen(
                 else -> {}
             }
         }
+    }
+
+    knowledgeDialog?.let { entity ->
+        AlertDialog(
+            onDismissRequest = { knowledgeDialog = null },
+            title = { Text(entity.title, fontSize = 16.sp) },
+            text = {
+                Column {
+                    if (entity.formula.isNotBlank()) {
+                        Text(entity.formula, fontSize = 12.sp, color = colors.text2)
+                    }
+                    if (entity.content.isNotBlank()) {
+                        Spacer(Modifier.height(6.dp))
+                        Text(entity.content.take(160), fontSize = 12.sp, color = colors.text2, lineHeight = 18.sp)
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    val id = entity.id
+                    knowledgeDialog = null
+                    onStartPractice(id)
+                }) { Text("去练习") }
+            },
+            dismissButton = {
+                TextButton(onClick = { knowledgeDialog = null }) { Text("关闭") }
+            }
+        )
     }
 }
 
