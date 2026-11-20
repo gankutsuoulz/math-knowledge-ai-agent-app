@@ -52,6 +52,7 @@ import com.mathkatex.verify.data.local.PhotoSolveRecordEntity
 import com.mathkatex.verify.data.local.PhotoSolveRepository
 import com.mathkatex.verify.data.service.LLMService
 import com.google.gson.Gson
+import com.google.gson.JsonParser
 import com.mathkatex.verify.ui.theme.LocalAppColors
 import com.mathkatex.verify.util.LogFileManager
 import kotlinx.coroutines.Dispatchers
@@ -69,7 +70,7 @@ private const val JPEG_QUALITY = 85
 private const val STRUCTURED_SOLVE_PROMPT = """你是一位耐心的初中数学老师。请先识别图片中的数学题目，再检查学生的解答。
 只输出一个 JSON 对象，不要用代码块包裹，字段如下：
 {"verdict":"对/错/部分对/未完成","question":"题干（LaTeX）","knowledge":["知识点1","知识点2"],"stuck":"卡在哪一步（一句话）","hints":["引导问题1","引导问题2","引导问题3"],"steps":["完整解析步骤1","步骤2"],"answer":"最终答案（LaTeX）"}
-要求：hints 只给启发式追问，不直接给答案；steps/answer 可以晚点再看。"""
+要求：hints 只给启发式追问，不直接给答案；steps/answer 可以晚点再看。所有字段都要输出，不能返回空对象；识别不了时 question 写“无法识别题目”。"""
 
 sealed class PhotoSolveStep {
     object Idle : PhotoSolveStep()
@@ -88,6 +89,11 @@ data class StructuredSolution(
     val steps: List<String> = emptyList(),
     val answer: String? = null
 )
+
+/** 结构化结果是否真的有内容（防止模型返回空对象时渲染成空白卡片）。 */
+fun StructuredSolution.hasContent(): Boolean =
+    !verdict.isNullOrBlank() || !question.isNullOrBlank() || knowledge.isNotEmpty() ||
+        !stuck.isNullOrBlank() || hints.isNotEmpty() || steps.isNotEmpty() || !answer.isNullOrBlank()
 
 data class SolveResult(
     val rawResponse: String,
@@ -447,9 +453,22 @@ fun PhotoSolveScreen(
                             )
 
                             apiResult.fold(
-                                onSuccess = { response ->
+                                onSuccess = { firstResponse ->
+                                    var response = firstResponse
+                                    var parsed = parseStructuredSolution(response)
+                                    // 模型偶尔返回空对象/坏 JSON：自动重试一次再展示
+                                    if (parsed == null || !parsed.hasContent()) {
+                                        LogFileManager.log("PhotoSolve", "structured empty, retrying once")
+                                        val retry = llmService.analyzeMathImage(
+                                            imageBase64 = base64,
+                                            prompt = usePrompt
+                                        )
+                                        retry.getOrNull()?.let { second ->
+                                            response = second
+                                            parsed = parseStructuredSolution(second)
+                                        }
+                                    }
                                     LogFileManager.logResponse("PhotoSolve", response)
-                                    val parsed = parseStructuredSolution(response)
                                     photoRecordId = "PHOTO_" + System.currentTimeMillis()
                                     photoFavorited = false
                                     result = SolveResult(
@@ -574,8 +593,17 @@ fun PhotoSolveScreen(
                                 }
                                 Spacer(Modifier.height(10.dp))
 
-                                val structured = solveResult.structured
+                                val structured = solveResult.structured?.takeIf { it.hasContent() }
                                 if (structured == null) {
+                                    if (solveResult.rawResponse.trimStart().startsWith("{")) {
+                                        Text(
+                                            text = "识别结果格式异常，没能读取到题目内容；请重新拍照或再试一次。",
+                                            fontSize = 12.sp,
+                                            color = colors.danger,
+                                            lineHeight = 18.sp,
+                                        )
+                                        Spacer(Modifier.height(8.dp))
+                                    }
                                     Text(
                                         text = "先别急着看答案",
                                         fontSize = 15.sp,
@@ -900,7 +928,29 @@ private fun parseStructuredSolution(raw: String): StructuredSolution? {
     val end = text.lastIndexOf('}')
     if (start < 0 || end <= start) return null
     return try {
-        Gson().fromJson(text.substring(start, end + 1), StructuredSolution::class.java)
+        val json = text.substring(start, end + 1)
+        val parsed = Gson().fromJson(json, StructuredSolution::class.java)
+        if (parsed != null && parsed.hasContent()) return parsed
+
+        // 兼容模型偶尔用中文字段名的情况
+        val obj = JsonParser.parseString(json).asJsonObject
+        fun str(vararg keys: String): String? = keys.firstNotNullOfOrNull { key ->
+            obj.get(key)?.takeIf { it.isJsonPrimitive }?.asString?.takeIf { it.isNotBlank() }
+        }
+        fun list(vararg keys: String): List<String> = keys.firstNotNullOfOrNull { key ->
+            obj.get(key)?.takeIf { it.isJsonArray }?.asJsonArray
+                ?.mapNotNull { it.takeIf { v -> v.isJsonPrimitive }?.asString }
+                ?.filter { it.isNotBlank() }
+        } ?: emptyList()
+        StructuredSolution(
+            verdict = str("verdict", "判定", "结论"),
+            question = str("question", "题干", "题目"),
+            knowledge = list("knowledge", "知识点"),
+            stuck = str("stuck", "卡点", "错误"),
+            hints = list("hints", "引导问题", "提示"),
+            steps = list("steps", "解析", "步骤"),
+            answer = str("answer", "答案"),
+        ).takeIf { it.hasContent() }
     } catch (e: Exception) {
         LogFileManager.logError("PhotoSolve", "parseStructuredSolution failed: ${e.message}")
         null

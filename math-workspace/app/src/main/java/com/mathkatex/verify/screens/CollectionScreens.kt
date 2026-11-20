@@ -374,7 +374,11 @@ private fun photoDisplayMarkdown(record: com.mathkatex.verify.data.local.PhotoSo
     } catch (e: Exception) {
         null
     }
-    if (s == null) return record.rawResponse
+    if (s == null || !s.hasContent()) {
+        return if (record.rawResponse.trimStart().startsWith("{"))
+            "这条收藏没有可用的结构化结果，请到拍照页重新识别。"
+        else record.rawResponse
+    }
     return buildString {
         s.question?.takeIf { it.isNotBlank() }?.let { append(it).append("\n\n") }
         if (s.verdict != null) append("**判定**：").append(s.verdict).append("\n\n")
