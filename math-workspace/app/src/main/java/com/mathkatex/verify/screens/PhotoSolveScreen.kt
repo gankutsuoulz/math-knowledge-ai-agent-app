@@ -594,7 +594,7 @@ fun PhotoSolveScreen(
                                     structured.question?.takeIf { it.isNotBlank() }?.let { q ->
                                         Spacer(Modifier.height(8.dp))
                                         MarkdownWebView(
-                                            markdown = q,
+                                            markdown = q.replace("\\n", "\n"),
                                             modifier = Modifier.fillMaxWidth().heightIn(min = 60.dp)
                                         )
                                     }
@@ -619,35 +619,24 @@ fun PhotoSolveScreen(
                                             }
                                         }
                                     }
-                                    structured.stuck?.takeIf { it.isNotBlank() }?.let { stuck ->
-                                        Spacer(Modifier.height(12.dp))
-                                        Text(
-                                            text = "卡点：${plainMath(stuck)}",
-                                            fontSize = 12.sp,
-                                            color = colors.text2,
-                                            lineHeight = 18.sp
-                                        )
-                                    }
-                                    if (structured.hints.isNotEmpty()) {
-                                        Spacer(Modifier.height(12.dp))
-                                        Text("引导问题", fontSize = 12.5.sp, fontWeight = FontWeight.Bold, color = colors.text)
-                                        structured.hints.forEachIndexed { index, hint ->
-                                            Row(modifier = Modifier.padding(top = 7.dp)) {
-                                                Text(
-                                                    text = "${index + 1}.",
-                                                    fontSize = 12.sp,
-                                                    color = colors.primary,
-                                                    fontWeight = FontWeight.SemiBold
-                                                )
-                                                Spacer(Modifier.width(6.dp))
-                                                Text(
-                                                    text = plainMath(hint),
-                                                    fontSize = 12.sp,
-                                                    color = colors.text2,
-                                                    lineHeight = 18.sp
-                                                )
+                                    // 卡点与引导问题里常有公式，交给本地 KaTeX 渲染，避免露出 $ 或反斜杠
+                                    if (structured.stuck?.isNotBlank() == true || structured.hints.isNotEmpty()) {
+                                        val guidanceMarkdown = buildString {
+                                            structured.stuck?.takeIf { it.isNotBlank() }?.let {
+                                                append("**卡点**：").append(it.replace("\\n", "\n")).append("\n\n")
+                                            }
+                                            if (structured.hints.isNotEmpty()) {
+                                                append("**引导问题**\n\n")
+                                                structured.hints.forEachIndexed { index, hint ->
+                                                    append(index + 1).append(". ").append(hint.replace("\\n", "\n")).append("\n")
+                                                }
                                             }
                                         }
+                                        Spacer(Modifier.height(10.dp))
+                                        MarkdownWebView(
+                                            markdown = guidanceMarkdown.trim(),
+                                            modifier = Modifier.fillMaxWidth().heightIn(min = 80.dp)
+                                        )
                                     }
                                     if (structured.steps.isNotEmpty() || structured.answer != null) {
                                         Spacer(Modifier.height(14.dp))
@@ -661,7 +650,7 @@ fun PhotoSolveScreen(
                                         if (showFullSolution) {
                                             val md = buildString {
                                                 structured.steps.forEachIndexed { i, step ->
-                                                    append("**第 ${i + 1} 步**：").append(step).append("\n\n")
+                                                    append("**第 ${i + 1} 步**：").append(step.replace("\\n", "\n")).append("\n\n")
                                                 }
                                                 structured.answer?.let { append("**答案**：").append(it) }
                                             }
