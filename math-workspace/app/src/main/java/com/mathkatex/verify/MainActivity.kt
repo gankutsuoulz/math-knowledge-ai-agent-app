@@ -111,8 +111,7 @@ private var pendingEditResult: Bitmap? = null
 fun MathAppNavigation() {
     val navController = rememberNavController()
     // 圈选：来源图 / 回填结果
-    var regionSourceBitmap by remember { mutableStateOf<Bitmap?>(null) }
-    var regionResultBitmap by remember { mutableStateOf<Bitmap?>(null) }
+
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route ?: Screen.Home.route
     val showTabs = tabs.any { it.route == currentRoute }
@@ -141,12 +140,7 @@ fun MathAppNavigation() {
                         imageEditSourceBitmap = bitmap
                         navController.navigate(Screen.ImageEdit.route)
                     },
-                    onNavigateToRegionSelect = { bitmap ->
-                        regionSourceBitmap = bitmap
-                        navController.navigate(Screen.RegionSelect.route)
-                    },
-                    regionResult = regionResultBitmap,
-                    onRegionConsumed = { regionResultBitmap = null },
+
                     onBack = { navController.popBackStack() },
                 )
             }
@@ -167,25 +161,6 @@ fun MathAppNavigation() {
                     )
                 } else {
                     // 来源位图已被消费（如确认后置空）：保持空白，避免二次 pop 掉上一页
-                    androidx.compose.foundation.layout.Box(androidx.compose.ui.Modifier.fillMaxSize())
-                }
-            }
-            composable(Screen.RegionSelect.route) {
-                val src = regionSourceBitmap
-                if (src != null) {
-                    RegionSelectScreen(
-                        originalBitmap = src,
-                        onConfirm = { result ->
-                            regionResultBitmap = result
-                            regionSourceBitmap = null
-                            navController.popBackStack()
-                        },
-                        onCancel = {
-                            regionSourceBitmap = null
-                            navController.popBackStack()
-                        }
-                    )
-                } else {
                     androidx.compose.foundation.layout.Box(androidx.compose.ui.Modifier.fillMaxSize())
                 }
             }

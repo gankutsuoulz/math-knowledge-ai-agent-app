@@ -71,9 +71,6 @@ data class SolveResult(
 @Composable
 fun PhotoSolveScreen(
     onNavigateToImageEdit: ((Bitmap) -> Unit)? = null,
-    onNavigateToRegionSelect: ((Bitmap) -> Unit)? = null,
-    regionResult: Bitmap? = null,
-    onRegionConsumed: () -> Unit = {},
     onBack: () -> Unit = {},
 ) {
     val context = LocalContext.current
@@ -82,6 +79,8 @@ fun PhotoSolveScreen(
     val scrollState = rememberScrollState()
 
     var currentStep by remember { mutableStateOf<PhotoSolveStep>(PhotoSolveStep.Idle) }
+    // 圈选页内嵌显示，避免离开页面导致已选图片状态丢失
+    var showRegionSelect by remember { mutableStateOf(false) }
     var result by remember { mutableStateOf<SolveResult?>(null) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
     var selectedBitmap by remember { mutableStateOf<Bitmap?>(null) }
@@ -162,17 +161,23 @@ fun PhotoSolveScreen(
         }
     }
 
-    // 圈选结果回填：替换当前待识别图片
-    LaunchedEffect(regionResult) {
-        if (regionResult != null) {
-            selectedBitmap = regionResult
-            currentStep = PhotoSolveStep.ImageSelected
-            onRegionConsumed()
-        }
-    }
-
     // 不在离开页面时 recycle：位图可能被圈选页继续使用，交给 GC 回收
     val colors = LocalAppColors.current
+
+    // 内嵌圈选页：确认/取消都直接回到当前页面，图片状态不丢
+    if (showRegionSelect && selectedBitmap != null) {
+        RegionSelectScreen(
+            originalBitmap = selectedBitmap!!,
+            onConfirm = { masked ->
+                selectedBitmap = masked
+                currentStep = PhotoSolveStep.ImageSelected
+                showRegionSelect = false
+            },
+            onCancel = { showRegionSelect = false }
+        )
+        return
+    }
+
     Scaffold(
         containerColor = colors.background,
         topBar = {
@@ -263,7 +268,7 @@ fun PhotoSolveScreen(
                 contentAlignment = Alignment.Center
             ) {
                 when (currentStep) {
-                    is PhotoSolveStep.Idle, is PhotoSolveStep.Error -> {
+                    is PhotoSolveStep.Idle -> {
                         Column(
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
@@ -278,6 +283,21 @@ fun PhotoSolveScreen(
                                 text = "点击上方按钮获取图片",
                                 fontSize = 14.sp,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+                    is PhotoSolveStep.Error -> {
+                        val bitmap = selectedBitmap
+                        if (bitmap == null) {
+                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                Text("识别失败，请重新选择图片", fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            }
+                        } else {
+                            Image(
+                                bitmap = bitmap.asImageBitmap(),
+                                contentDescription = "Selected image",
+                                modifier = Modifier.fillMaxSize().clip(RoundedCornerShape(12.dp)),
+                                contentScale = ContentScale.Fit
                             )
                         }
                     }
@@ -306,7 +326,7 @@ fun PhotoSolveScreen(
                 ) {
                     OutlinedButton(
                         onClick = {
-                            onNavigateToRegionSelect?.invoke(selectedBitmap!!)
+                            showRegionSelect = true
                         },
                         modifier = Modifier.weight(1.3f),
                         shape = RoundedCornerShape(12.dp),
@@ -372,7 +392,7 @@ fun PhotoSolveScreen(
             // 分析按钮
             Button(
                 onClick = {
-                    if (currentStep == PhotoSolveStep.ImageSelected && selectedBitmap != null) {
+                    if ((currentStep == PhotoSolveStep.ImageSelected || currentStep is PhotoSolveStep.Error) && selectedBitmap != null) {
                         currentStep = PhotoSolveStep.Analyzing
                         errorMessage = null
 
@@ -410,7 +430,7 @@ fun PhotoSolveScreen(
                         }
                     }
                 },
-                enabled = currentStep == PhotoSolveStep.ImageSelected && selectedBitmap != null,
+                enabled = selectedBitmap != null && (currentStep == PhotoSolveStep.ImageSelected || currentStep is PhotoSolveStep.Error),
                 modifier = Modifier.fillMaxWidth(),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = MaterialTheme.colorScheme.primary
