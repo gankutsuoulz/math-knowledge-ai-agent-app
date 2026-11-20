@@ -20,5 +20,6 @@ data class KnowledgeEntity(
     val title: String,           // 知识点标题
     val formula: String,         // LaTeX 公式
     val content: String,         // 详细说明
-    val fullPath: String         // 完整分类路径，如 "数与代数 > 数与运算基础 > 小数的认识与运算"
+    val fullPath: String,        // 完整分类路径，如 "数与代数 > 数与运算基础 > 小数的认识与运算"
+    val abilityLevel: String = "" // dim2 能力层（L1/L2/L3），导入图谱时回填
 )

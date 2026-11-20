@@ -23,6 +23,7 @@ object ExampleImporter {
                 source = obj.get("source")?.asString ?: "local",
                 type = obj.get("type")?.asString ?: "choice",
                 options = obj.get("options")?.toString() ?: "[]",
+                knowledgeId = obj.get("knowledgeId")?.asString ?: "",
             )
         }
         dao.insertAll(items)

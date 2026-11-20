@@ -73,6 +73,17 @@ object KnowledgeRepository {
                     }
                 }
 
+                // 图谱关系导入（幂等）：关系/别名/路径/题型/例题回填
+                withContext(Dispatchers.IO) {
+                    KnowledgeGraphImporter.importFromAssets(
+                        context,
+                        dao!!,
+                        db.knowledgeGraphDao(),
+                        db.exampleDao(),
+                        db.practiceDao(),
+                    )
+                }
+
                 _isReady.value = true
                 Log.d("KnowledgeRepo", "Initialization complete, isReady=true")
             } catch (e: Exception) {

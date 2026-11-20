@@ -12,4 +12,5 @@ data class PracticeRecordEntity(
     val correct: Boolean,
     val userAnswer: String,
     val createdAt: Long,
+    val knowledgeId: String = "",
 )

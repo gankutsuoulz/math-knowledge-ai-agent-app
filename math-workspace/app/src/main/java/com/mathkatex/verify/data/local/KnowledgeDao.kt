@@ -34,6 +34,15 @@ interface KnowledgeDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAll(items: List<KnowledgeEntity>)
 
+    @Query("UPDATE knowledge_points SET abilityLevel = :level WHERE id = :id")
+    suspend fun updateAbilityLevel(id: String, level: String)
+
+    @Query("SELECT * FROM knowledge_points WHERE id IN (:ids)")
+    suspend fun getByIds(ids: List<String>): List<KnowledgeEntity>
+
+    @Query("SELECT * FROM knowledge_points WHERE grade = :grade ORDER BY id")
+    suspend fun getByGrade(grade: String): List<KnowledgeEntity>
+
     @Query("DELETE FROM knowledge_points")
     suspend fun deleteAll()
 

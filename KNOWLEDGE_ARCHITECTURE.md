@@ -162,7 +162,14 @@ Room v4 迁移（保留现网数据）：
 5. **范围膨胀**：P0–P3 只做初一初二；全学段单独立项，不阻塞闭环。
 6. **内容质量**：题目解析需标注来源与审核状态，未审题不进推荐。
 
-## 八、立即可做（本周）
+## 八、落地进度（2026-11-20）
+
+- [x] P0 `knowledge_graph.json` v0.1：368 节点、382 条边（308 去重后入库）、760 别名、13 条专题路径（115 节点）、19 个题型模型、60/60 例题回填 knowledgeId；初一初二路径覆盖 107/113 节点。
+- [x] P1 Room v4：`knowledge_edges / aliases / paths / path_items / models` 表 + `examples.knowledgeId / practice_records.knowledgeId / knowledge_points.abilityLevel`；3→4 迁移在旧 release 数据库上验证通过（user_version=4，图谱导入成功）。
+- [ ] P2 全链路跳转
+- [ ] P3 掌握度/复习/今日三步
+
+## 九、立即可做（本周）
 
 1. 产出 `knowledge_graph.json` v0.1（初一/初二节点 + 别名 + 前置边 + 60 例题 ID 回填）。
 2. Room v4 schema 与迁移脚本；保留旧 `knowledge_points` 数据。

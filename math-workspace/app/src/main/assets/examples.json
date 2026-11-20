@@ -1,1022 +1,1082 @@
 [
-  {
-    "id": "EX_G7_ADD_01",
-    "knowledgeTitle": "有理数加法",
-    "grade": "初一",
-    "difficulty": 1,
-    "type": "choice",
-    "question": "计算：$(-3)+(-5)$",
-    "options": [
-      "$-8$",
-      "$8$",
-      "$-2$",
-      "$2$"
-    ],
-    "answer": "$-8$",
-    "solution": "同号相加，取相同符号，绝对值相加：$-(3+5)=-8$。",
-    "source": "local"
-  },
-  {
-    "id": "EX_G7_ADD_02",
-    "knowledgeTitle": "有理数加法",
-    "grade": "初一",
-    "difficulty": 2,
-    "type": "choice",
-    "question": "计算：$(-7)+4$",
-    "options": [
-      "$-3$",
-      "$3$",
-      "$-11$",
-      "$11$"
-    ],
-    "answer": "$-3$",
-    "solution": "异号相加，取绝对值较大的符号，再用较大绝对值减较小绝对值：$-(7-4)=-3$。",
-    "source": "local"
-  },
-  {
-    "id": "EX_G7_ADD_03",
-    "knowledgeTitle": "有理数加法",
-    "grade": "初一",
-    "difficulty": 3,
-    "type": "choice",
-    "question": "计算：$5+(-12)+7$",
-    "options": [
-      "$0$",
-      "$24$",
-      "$-24$",
-      "$14$"
-    ],
-    "answer": "$0$",
-    "solution": "先算 $5+7=12$，再算 $12+(-12)=0$。",
-    "source": "local"
-  },
-  {
-    "id": "EX_G7_SUB_01",
-    "knowledgeTitle": "有理数减法",
-    "grade": "初一",
-    "difficulty": 1,
-    "type": "choice",
-    "question": "计算：$3-(-5)$",
-    "options": [
-      "$8$",
-      "$-8$",
-      "$-2$",
-      "$2$"
-    ],
-    "answer": "$8$",
-    "solution": "减去一个数等于加上它的相反数：$3+5=8$。",
-    "source": "local"
-  },
-  {
-    "id": "EX_G7_SUB_02",
-    "knowledgeTitle": "有理数减法",
-    "grade": "初一",
-    "difficulty": 2,
-    "type": "choice",
-    "question": "计算：$-4-6$",
-    "options": [
-      "$-10$",
-      "$10$",
-      "$-2$",
-      "$2$"
-    ],
-    "answer": "$-10$",
-    "solution": "$-4-6=-4+(-6)=-10$。",
-    "source": "local"
-  },
-  {
-    "id": "EX_G7_SUB_03",
-    "knowledgeTitle": "有理数减法",
-    "grade": "初一",
-    "difficulty": 3,
-    "type": "choice",
-    "question": "计算：$-2-(-7)$",
-    "options": [
-      "$5$",
-      "$-5$",
-      "$9$",
-      "$-9$"
-    ],
-    "answer": "$5$",
-    "solution": "$-2+7=5$。",
-    "source": "local"
-  },
-  {
-    "id": "EX_G7_MUL_01",
-    "knowledgeTitle": "有理数乘法",
-    "grade": "初一",
-    "difficulty": 1,
-    "type": "choice",
-    "question": "计算：$(-3)\\times 4$",
-    "options": [
-      "$-12$",
-      "$12$",
-      "$-7$",
-      "$7$"
-    ],
-    "answer": "$-12$",
-    "solution": "异号相乘得负，绝对值相乘：$-(3\\times 4)=-12$。",
-    "source": "local"
-  },
-  {
-    "id": "EX_G7_MUL_02",
-    "knowledgeTitle": "有理数乘法",
-    "grade": "初一",
-    "difficulty": 2,
-    "type": "choice",
-    "question": "计算：$(-5)\\times(-6)$",
-    "options": [
-      "$30$",
-      "$-30$",
-      "$-11$",
-      "$11$"
-    ],
-    "answer": "$30$",
-    "solution": "同号相乘得正，绝对值相乘：$5\\times 6=30$。",
-    "source": "local"
-  },
-  {
-    "id": "EX_G7_MUL_03",
-    "knowledgeTitle": "有理数乘法",
-    "grade": "初一",
-    "difficulty": 3,
-    "type": "choice",
-    "question": "计算：$(-2)\\times 3\\times(-5)$",
-    "options": [
-      "$30$",
-      "$-30$",
-      "$10$",
-      "$-10$"
-    ],
-    "answer": "$30$",
-    "solution": "先定符号：两个负号得正；再算 $2\\times 3\\times 5=30$。",
-    "source": "local"
-  },
-  {
-    "id": "EX_G7_DIV_01",
-    "knowledgeTitle": "有理数除法",
-    "grade": "初一",
-    "difficulty": 1,
-    "type": "choice",
-    "question": "计算：$(-12)\\div 3$",
-    "options": [
-      "$-4$",
-      "$4$",
-      "$-9$",
-      "$9$"
-    ],
-    "answer": "$-4$",
-    "solution": "异号相除得负，$12\\div 3=4$，所以结果是 $-4$。",
-    "source": "local"
-  },
-  {
-    "id": "EX_G7_DIV_02",
-    "knowledgeTitle": "有理数除法",
-    "grade": "初一",
-    "difficulty": 2,
-    "type": "choice",
-    "question": "计算：$(-36)\\div(-9)$",
-    "options": [
-      "$4$",
-      "$-4$",
-      "$27$",
-      "$-27$"
-    ],
-    "answer": "$4$",
-    "solution": "同号相除得正，$36\\div 9=4$。",
-    "source": "local"
-  },
-  {
-    "id": "EX_G7_DIV_03",
-    "knowledgeTitle": "有理数除法",
-    "grade": "初一",
-    "difficulty": 3,
-    "type": "choice",
-    "question": "计算：$\\left(-\\frac{3}{4}\\right)\\div\\frac{3}{8}$",
-    "options": [
-      "$-2$",
-      "$2$",
-      "$-\\frac{1}{2}$",
-      "$\\frac{1}{2}$"
-    ],
-    "answer": "$-2$",
-    "solution": "除以一个分数等于乘它的倒数：$-\\frac{3}{4}\\times\\frac{8}{3}=-2$。",
-    "source": "local"
-  },
-  {
-    "id": "EX_G7_POW_01",
-    "knowledgeTitle": "有理数乘方",
-    "grade": "初一",
-    "difficulty": 1,
-    "type": "choice",
-    "question": "计算：$(-2)^3$",
-    "options": [
-      "$-8$",
-      "$8$",
-      "$-6$",
-      "$6$"
-    ],
-    "answer": "$-8$",
-    "solution": "$(-2)^3=(-2)\\times(-2)\\times(-2)=-8$。",
-    "source": "local"
-  },
-  {
-    "id": "EX_G7_POW_02",
-    "knowledgeTitle": "有理数乘方",
-    "grade": "初一",
-    "difficulty": 2,
-    "type": "choice",
-    "question": "计算：$-3^2$",
-    "options": [
-      "$-9$",
-      "$9$",
-      "$-6$",
-      "$6$"
-    ],
-    "answer": "$-9$",
-    "solution": "$3^2=9$，前面的负号保留，所以是 $-9$。",
-    "source": "local"
-  },
-  {
-    "id": "EX_G7_POW_03",
-    "knowledgeTitle": "有理数乘方",
-    "grade": "初一",
-    "difficulty": 3,
-    "type": "choice",
-    "question": "计算：$\\left(-\\frac{1}{2}\\right)^3$",
-    "options": [
-      "$-\\frac{1}{8}$",
-      "$\\frac{1}{8}$",
-      "$-\\frac{1}{6}$",
-      "$\\frac{1}{6}$"
-    ],
-    "answer": "$-\\frac{1}{8}$",
-    "solution": "$(-1)^3=-1$，$2^3=8$，所以是 $-\\frac{1}{8}$。",
-    "source": "local"
-  },
-  {
-    "id": "EX_G7_LIKE_01",
-    "knowledgeTitle": "合并同类项",
-    "grade": "初一",
-    "difficulty": 1,
-    "type": "choice",
-    "question": "化简：$3x+2y-5x+4y$",
-    "options": [
-      "$-2x+6y$",
-      "$2x+6y$",
-      "$-2x-6y$",
-      "$8x+6y$"
-    ],
-    "answer": "$-2x+6y$",
-    "solution": "合并 $x$ 项：$3x-5x=-2x$；合并 $y$ 项：$2y+4y=6y$。",
-    "source": "local"
-  },
-  {
-    "id": "EX_G7_LIKE_02",
-    "knowledgeTitle": "合并同类项",
-    "grade": "初一",
-    "difficulty": 2,
-    "type": "choice",
-    "question": "化简：$5a^2-3a+2a^2+4a$",
-    "options": [
-      "$7a^2+a$",
-      "$7a^2-a$",
-      "$3a^2+a$",
-      "$7a^4+a$"
-    ],
-    "answer": "$7a^2+a$",
-    "solution": "$a^2$ 项：$5a^2+2a^2=7a^2$；$a$ 项：$-3a+4a=a$。",
-    "source": "local"
-  },
-  {
-    "id": "EX_G7_LIKE_03",
-    "knowledgeTitle": "合并同类项",
-    "grade": "初一",
-    "difficulty": 3,
-    "type": "choice",
-    "question": "化简：$2(x-3y)-3(x-2y)$",
-    "options": [
-      "$-x$",
-      "$x$",
-      "$-x-12y$",
-      "$-5x$"
-    ],
-    "answer": "$-x$",
-    "solution": "去括号：$2x-6y-3x+6y$，$x$ 项 $-x$，$y$ 项为 $0$。",
-    "source": "local"
-  },
-  {
-    "id": "EX_G7_BRACKET_01",
-    "knowledgeTitle": "去括号法则",
-    "grade": "初一",
-    "difficulty": 1,
-    "type": "choice",
-    "question": "去括号：$a+(b-c)$",
-    "options": [
-      "$a+b-c$",
-      "$a-b+c$",
-      "$a-b-c$",
-      "$a+b+c$"
-    ],
-    "answer": "$a+b-c$",
-    "solution": "括号前是 $+$，去括号后符号不变。",
-    "source": "local"
-  },
-  {
-    "id": "EX_G7_BRACKET_02",
-    "knowledgeTitle": "去括号法则",
-    "grade": "初一",
-    "difficulty": 2,
-    "type": "choice",
-    "question": "去括号：$a-(b-c)$",
-    "options": [
-      "$a-b+c$",
-      "$a+b-c$",
-      "$a+b+c$",
-      "$a-b-c$"
-    ],
-    "answer": "$a-b+c$",
-    "solution": "括号前是 $-$，去括号后括号内各项都变号。",
-    "source": "local"
-  },
-  {
-    "id": "EX_G7_BRACKET_03",
-    "knowledgeTitle": "去括号法则",
-    "grade": "初一",
-    "difficulty": 3,
-    "type": "choice",
-    "question": "去括号：$-2(3x-4y+1)$",
-    "options": [
-      "$-6x+8y-2$",
-      "$-6x-8y-2$",
-      "$6x+8y-2$",
-      "$-6x+8y+2$"
-    ],
-    "answer": "$-6x+8y-2$",
-    "solution": "用 $-2$ 乘括号内每一项：$-6x+8y-2$。",
-    "source": "local"
-  },
-  {
-    "id": "EX_G7_EQ_01",
-    "knowledgeTitle": "一元一次方程解法",
-    "grade": "初一",
-    "difficulty": 1,
-    "type": "choice",
-    "question": "解方程：$2x+5=13$",
-    "options": [
-      "$x=4$",
-      "$x=9$",
-      "$x=6.5$",
-      "$x=-4$"
-    ],
-    "answer": "$x=4$",
-    "solution": "移项：$2x=8$，两边除以 $2$：$x=4$。",
-    "source": "local"
-  },
-  {
-    "id": "EX_G7_EQ_02",
-    "knowledgeTitle": "一元一次方程解法",
-    "grade": "初一",
-    "difficulty": 2,
-    "type": "choice",
-    "question": "解方程：$3x-7=8$",
-    "options": [
-      "$x=5$",
-      "$x=3$",
-      "$x=\\frac{1}{3}$",
-      "$x=15$"
-    ],
-    "answer": "$x=5$",
-    "solution": "移项：$3x=15$，两边除以 $3$：$x=5$。",
-    "source": "local"
-  },
-  {
-    "id": "EX_G7_EQ_03",
-    "knowledgeTitle": "一元一次方程解法",
-    "grade": "初一",
-    "difficulty": 3,
-    "type": "choice",
-    "question": "解方程：$\\frac{x-1}{2}+1=3$",
-    "options": [
-      "$x=5$",
-      "$x=3$",
-      "$x=7$",
-      "$x=4$"
-    ],
-    "answer": "$x=5$",
-    "solution": "先移项：$\\frac{x-1}{2}=2$，去分母得 $x-1=4$，所以 $x=5$。",
-    "source": "local"
-  },
-  {
-    "id": "EX_G7_MOVE_01",
-    "knowledgeTitle": "移项法则",
-    "grade": "初一",
-    "difficulty": 1,
-    "type": "choice",
-    "question": "解方程：$2x+3=7x-12$",
-    "options": [
-      "$x=3$",
-      "$x=-3$",
-      "$x=5$",
-      "$x=-5$"
-    ],
-    "answer": "$x=3$",
-    "solution": "移项：$3+12=7x-2x$，即 $15=5x$，所以 $x=3$。",
-    "source": "local"
-  },
-  {
-    "id": "EX_G7_MOVE_02",
-    "knowledgeTitle": "移项法则",
-    "grade": "初一",
-    "difficulty": 2,
-    "type": "choice",
-    "question": "解方程：$5x-4=2x+8$",
-    "options": [
-      "$x=4$",
-      "$x=12$",
-      "$x=\\frac{4}{3}$",
-      "$x=-4$"
-    ],
-    "answer": "$x=4$",
-    "solution": "移项：$5x-2x=8+4$，$3x=12$，所以 $x=4$。",
-    "source": "local"
-  },
-  {
-    "id": "EX_G7_MOVE_03",
-    "knowledgeTitle": "移项法则",
-    "grade": "初一",
-    "difficulty": 3,
-    "type": "choice",
-    "question": "解方程：$3(x-2)=2x+1$",
-    "options": [
-      "$x=7$",
-      "$x=5$",
-      "$x=-7$",
-      "$x=1$"
-    ],
-    "answer": "$x=7$",
-    "solution": "去括号：$3x-6=2x+1$，移项得 $x=7$。",
-    "source": "local"
-  },
-  {
-    "id": "EX_G7_SUB_SYS_01",
-    "knowledgeTitle": "代入消元法",
-    "grade": "初一",
-    "difficulty": 1,
-    "type": "choice",
-    "question": "解方程组：$\\begin{cases}x+y=5\\\\x-y=1\\end{cases}$",
-    "options": [
-      "$x=3,\\ y=2$",
-      "$x=2,\\ y=3$",
-      "$x=4,\\ y=1$",
-      "$x=1,\\ y=4$"
-    ],
-    "answer": "$x=3,\\ y=2$",
-    "solution": "两式相加得 $2x=6$，$x=3$；代回 $x+y=5$ 得 $y=2$。",
-    "source": "local"
-  },
-  {
-    "id": "EX_G7_SUB_SYS_02",
-    "knowledgeTitle": "代入消元法",
-    "grade": "初一",
-    "difficulty": 2,
-    "type": "choice",
-    "question": "解方程组：$\\begin{cases}y=2x\\\\x+y=9\\end{cases}$",
-    "options": [
-      "$x=3,\\ y=6$",
-      "$x=6,\\ y=3$",
-      "$x=2,\\ y=4$",
-      "$x=4,\\ y=8$"
-    ],
-    "answer": "$x=3,\\ y=6$",
-    "solution": "把 $y=2x$ 代入 $x+y=9$：$3x=9$，$x=3$，所以 $y=6$。",
-    "source": "local"
-  },
-  {
-    "id": "EX_G7_SUB_SYS_03",
-    "knowledgeTitle": "代入消元法",
-    "grade": "初一",
-    "difficulty": 3,
-    "type": "choice",
-    "question": "解方程组：$\\begin{cases}2x+y=7\\\\y=x+1\\end{cases}$",
-    "options": [
-      "$x=2,\\ y=3$",
-      "$x=3,\\ y=2$",
-      "$x=1,\\ y=2$",
-      "$x=2,\\ y=1$"
-    ],
-    "answer": "$x=2,\\ y=3$",
-    "solution": "把 $y=x+1$ 代入：$2x+x+1=7$，$3x=6$，$x=2$，所以 $y=3$。",
-    "source": "local"
-  },
-  {
-    "id": "EX_G7_ADD_SYS_01",
-    "knowledgeTitle": "加减消元法",
-    "grade": "初一",
-    "difficulty": 1,
-    "type": "choice",
-    "question": "解方程组：$\\begin{cases}2x+y=7\\\\x-y=2\\end{cases}$",
-    "options": [
-      "$x=3,\\ y=1$",
-      "$x=1,\\ y=3$",
-      "$x=2,\\ y=3$",
-      "$x=3,\\ y=2$"
-    ],
-    "answer": "$x=3,\\ y=1$",
-    "solution": "两式相加消去 $y$：$3x=9$，$x=3$；代回得 $y=1$。",
-    "source": "local"
-  },
-  {
-    "id": "EX_G7_ADD_SYS_02",
-    "knowledgeTitle": "加减消元法",
-    "grade": "初一",
-    "difficulty": 2,
-    "type": "choice",
-    "question": "解方程组：$\\begin{cases}3x+2y=12\\\\3x-2y=0\\end{cases}$",
-    "options": [
-      "$x=2,\\ y=3$",
-      "$x=3,\\ y=2$",
-      "$x=2,\\ y=1$",
-      "$x=4,\\ y=0$"
-    ],
-    "answer": "$x=2,\\ y=3$",
-    "solution": "两式相加：$6x=12$，$x=2$；代回 $3\\times2+2y=12$ 得 $y=3$。",
-    "source": "local"
-  },
-  {
-    "id": "EX_G7_ADD_SYS_03",
-    "knowledgeTitle": "加减消元法",
-    "grade": "初一",
-    "difficulty": 3,
-    "type": "choice",
-    "question": "解方程组：$\\begin{cases}4x+3y=18\\\\2x-3y=0\\end{cases}$",
-    "options": [
-      "$x=3,\\ y=2$",
-      "$x=2,\\ y=3$",
-      "$x=3,\\ y=1$",
-      "$x=4,\\ y=2$"
-    ],
-    "answer": "$x=3,\\ y=2$",
-    "solution": "两式相加：$6x=18$，$x=3$；代回 $2\\times3-3y=0$ 得 $y=2$。",
-    "source": "local"
-  },
-  {
-    "id": "EX_G7_INEQ_01",
-    "knowledgeTitle": "一元一次不等式解集",
-    "grade": "初一",
-    "difficulty": 1,
-    "type": "choice",
-    "question": "解不等式：$2x-3<5$",
-    "options": [
-      "$x<4$",
-      "$x>4$",
-      "$x<1$",
-      "$x>1$"
-    ],
-    "answer": "$x<4$",
-    "solution": "移项：$2x<8$，两边除以 $2$：$x<4$。",
-    "source": "local"
-  },
-  {
-    "id": "EX_G7_INEQ_02",
-    "knowledgeTitle": "一元一次不等式解集",
-    "grade": "初一",
-    "difficulty": 2,
-    "type": "choice",
-    "question": "解不等式：$-3x\\geq 9$",
-    "options": [
-      "$x\\leq -3$",
-      "$x\\geq -3$",
-      "$x\\leq 3$",
-      "$x\\geq 3$"
-    ],
-    "answer": "$x\\leq -3$",
-    "solution": "两边除以 $-3$，不等号方向改变：$x\\leq -3$。",
-    "source": "local"
-  },
-  {
-    "id": "EX_G7_INEQ_03",
-    "knowledgeTitle": "一元一次不等式解集",
-    "grade": "初一",
-    "difficulty": 3,
-    "type": "choice",
-    "question": "解不等式：$2(x-1)\\leq 3x+1$",
-    "options": [
-      "$x\\geq -3$",
-      "$x\\leq -3$",
-      "$x\\geq 3$",
-      "$x\\leq 3$"
-    ],
-    "answer": "$x\\geq -3$",
-    "solution": "去括号：$2x-2\\leq 3x+1$，移项得 $-3\\leq x$，即 $x\\geq -3$。",
-    "source": "local"
-  },
-  {
-    "id": "EX_G8_POWMUL_01",
-    "knowledgeTitle": "同底数幂乘法",
-    "grade": "初二",
-    "difficulty": 1,
-    "type": "choice",
-    "question": "计算：$a^2\\cdot a^3$",
-    "options": [
-      "$a^5$",
-      "$a^6$",
-      "$a^8$",
-      "$2a^5$"
-    ],
-    "answer": "$a^5$",
-    "solution": "同底数幂相乘，底数不变，指数相加：$a^{2+3}=a^5$。",
-    "source": "local"
-  },
-  {
-    "id": "EX_G8_POWMUL_02",
-    "knowledgeTitle": "同底数幂乘法",
-    "grade": "初二",
-    "difficulty": 2,
-    "type": "choice",
-    "question": "计算：$x^4\\cdot x$",
-    "options": [
-      "$x^5$",
-      "$x^4$",
-      "$x^8$",
-      "$2x^4$"
-    ],
-    "answer": "$x^5$",
-    "solution": "$x$ 的指数是 $1$，$x^{4+1}=x^5$。",
-    "source": "local"
-  },
-  {
-    "id": "EX_G8_POWMUL_03",
-    "knowledgeTitle": "同底数幂乘法",
-    "grade": "初二",
-    "difficulty": 3,
-    "type": "choice",
-    "question": "计算：$(-a)^2\\cdot a^3$",
-    "options": [
-      "$a^5$",
-      "$-a^5$",
-      "$a^6$",
-      "$-a^6$"
-    ],
-    "answer": "$a^5$",
-    "solution": "$(-a)^2=a^2$，再与 $a^3$ 相乘得 $a^5$。",
-    "source": "local"
-  },
-  {
-    "id": "EX_G8_POWPOW_01",
-    "knowledgeTitle": "幂的乘方",
-    "grade": "初二",
-    "difficulty": 1,
-    "type": "choice",
-    "question": "计算：$(a^2)^3$",
-    "options": [
-      "$a^6$",
-      "$a^5$",
-      "$a^8$",
-      "$a^9$"
-    ],
-    "answer": "$a^6$",
-    "solution": "幂的乘方，底数不变，指数相乘：$a^{2\\times3}=a^6$。",
-    "source": "local"
-  },
-  {
-    "id": "EX_G8_POWPOW_02",
-    "knowledgeTitle": "幂的乘方",
-    "grade": "初二",
-    "difficulty": 2,
-    "type": "choice",
-    "question": "计算：$(x^3)^4$",
-    "options": [
-      "$x^{12}$",
-      "$x^7$",
-      "$x^{64}$",
-      "$x^{9}$"
-    ],
-    "answer": "$x^{12}$",
-    "solution": "$x^{3\\times4}=x^{12}$。",
-    "source": "local"
-  },
-  {
-    "id": "EX_G8_POWPOW_03",
-    "knowledgeTitle": "幂的乘方",
-    "grade": "初二",
-    "difficulty": 3,
-    "type": "choice",
-    "question": "计算：$(-a^2)^3$",
-    "options": [
-      "$-a^6$",
-      "$a^6$",
-      "$-a^5$",
-      "$a^5$"
-    ],
-    "answer": "$-a^6$",
-    "solution": "$a^2$ 先乘方得 $a^6$，外面的负号保留：$-a^6$。",
-    "source": "local"
-  },
-  {
-    "id": "EX_G8_PRODPOW_01",
-    "knowledgeTitle": "积的乘方",
-    "grade": "初二",
-    "difficulty": 1,
-    "type": "choice",
-    "question": "计算：$(2x)^3$",
-    "options": [
-      "$8x^3$",
-      "$2x^3$",
-      "$6x^3$",
-      "$8x$"
-    ],
-    "answer": "$8x^3$",
-    "solution": "每个因式分别乘方：$2^3\\cdot x^3=8x^3$。",
-    "source": "local"
-  },
-  {
-    "id": "EX_G8_PRODPOW_02",
-    "knowledgeTitle": "积的乘方",
-    "grade": "初二",
-    "difficulty": 2,
-    "type": "choice",
-    "question": "计算：$(-3a^2)^2$",
-    "options": [
-      "$9a^4$",
-      "$-9a^4$",
-      "$6a^4$",
-      "$9a^2$"
-    ],
-    "answer": "$9a^4$",
-    "solution": "$(-3)^2=9$，$(a^2)^2=a^4$，所以是 $9a^4$。",
-    "source": "local"
-  },
-  {
-    "id": "EX_G8_PRODPOW_03",
-    "knowledgeTitle": "积的乘方",
-    "grade": "初二",
-    "difficulty": 3,
-    "type": "choice",
-    "question": "计算：$(ab^2)^3$",
-    "options": [
-      "$a^3b^6$",
-      "$a^3b^2$",
-      "$ab^6$",
-      "$a^3b^8$"
-    ],
-    "answer": "$a^3b^6$",
-    "solution": "$a^3\\cdot (b^2)^3=a^3b^6$。",
-    "source": "local"
-  },
-  {
-    "id": "EX_G8_SQDIFF_01",
-    "knowledgeTitle": "平方差公式",
-    "grade": "初二",
-    "difficulty": 1,
-    "type": "choice",
-    "question": "计算：$(x+3)(x-3)$",
-    "options": [
-      "$x^2-9$",
-      "$x^2+9$",
-      "$x^2-6x+9$",
-      "$x^2-3$"
-    ],
-    "answer": "$x^2-9$",
-    "solution": "平方差公式：$(a+b)(a-b)=a^2-b^2$，所以是 $x^2-9$。",
-    "source": "local"
-  },
-  {
-    "id": "EX_G8_SQDIFF_02",
-    "knowledgeTitle": "平方差公式",
-    "grade": "初二",
-    "difficulty": 2,
-    "type": "choice",
-    "question": "计算：$(2a+b)(2a-b)$",
-    "options": [
-      "$4a^2-b^2$",
-      "$2a^2-b^2$",
-      "$4a^2+b^2$",
-      "$4a^2-4ab+b^2$"
-    ],
-    "answer": "$4a^2-b^2$",
-    "solution": "$(2a)^2-b^2=4a^2-b^2$。",
-    "source": "local"
-  },
-  {
-    "id": "EX_G8_SQDIFF_03",
-    "knowledgeTitle": "平方差公式",
-    "grade": "初二",
-    "difficulty": 3,
-    "type": "choice",
-    "question": "计算：$101\\times99$",
-    "options": [
-      "$9999$",
-      "$10000$",
-      "$9998$",
-      "$10100$"
-    ],
-    "answer": "$9999$",
-    "solution": "写成 $(100+1)(100-1)=100^2-1=9999$。",
-    "source": "local"
-  },
-  {
-    "id": "EX_G8_SQSUM_01",
-    "knowledgeTitle": "完全平方公式",
-    "grade": "初二",
-    "difficulty": 1,
-    "type": "choice",
-    "question": "计算：$(x+2)^2$",
-    "options": [
-      "$x^2+4x+4$",
-      "$x^2+4$",
-      "$x^2+2x+4$",
-      "$x^2-4x+4$"
-    ],
-    "answer": "$x^2+4x+4$",
-    "solution": "$(a+b)^2=a^2+2ab+b^2$，所以是 $x^2+4x+4$。",
-    "source": "local"
-  },
-  {
-    "id": "EX_G8_SQSUM_02",
-    "knowledgeTitle": "完全平方公式",
-    "grade": "初二",
-    "difficulty": 2,
-    "type": "choice",
-    "question": "计算：$(3a-1)^2$",
-    "options": [
-      "$9a^2-6a+1$",
-      "$9a^2+6a+1$",
-      "$9a^2-1$",
-      "$3a^2-6a+1$"
-    ],
-    "answer": "$9a^2-6a+1$",
-    "solution": "$(a-b)^2=a^2-2ab+b^2$：$9a^2-6a+1$。",
-    "source": "local"
-  },
-  {
-    "id": "EX_G8_SQSUM_03",
-    "knowledgeTitle": "完全平方公式",
-    "grade": "初二",
-    "difficulty": 3,
-    "type": "choice",
-    "question": "计算：$(x-2y)^2$",
-    "options": [
-      "$x^2-4xy+4y^2$",
-      "$x^2+4xy+4y^2$",
-      "$x^2-4y^2$",
-      "$x^2-2xy+4y^2$"
-    ],
-    "answer": "$x^2-4xy+4y^2$",
-    "solution": "$x^2-2\\cdot x\\cdot2y+(2y)^2=x^2-4xy+4y^2$。",
-    "source": "local"
-  },
-  {
-    "id": "EX_G8_GCF_01",
-    "knowledgeTitle": "提公因式法",
-    "grade": "初二",
-    "difficulty": 1,
-    "type": "choice",
-    "question": "分解因式：$6x^2+9x$",
-    "options": [
-      "$3x(2x+3)$",
-      "$3(2x^2+3x)$",
-      "$x(6x+9)$",
-      "$3x(2x+9)$"
-    ],
-    "answer": "$3x(2x+3)$",
-    "solution": "公因式是 $3x$，提取后得 $3x(2x+3)$。",
-    "source": "local"
-  },
-  {
-    "id": "EX_G8_GCF_02",
-    "knowledgeTitle": "提公因式法",
-    "grade": "初二",
-    "difficulty": 2,
-    "type": "choice",
-    "question": "分解因式：$4a^3b-8a^2b^2$",
-    "options": [
-      "$4a^2b(a-2b)$",
-      "$4a^2b(a-2)$",
-      "$2a^2b(2a-4b)$",
-      "$4ab(a^2-2ab)$"
-    ],
-    "answer": "$4a^2b(a-2b)$",
-    "solution": "公因式是 $4a^2b$，提取后得 $4a^2b(a-2b)$。",
-    "source": "local"
-  },
-  {
-    "id": "EX_G8_GCF_03",
-    "knowledgeTitle": "提公因式法",
-    "grade": "初二",
-    "difficulty": 3,
-    "type": "choice",
-    "question": "分解因式：$-3x^2+6x$",
-    "options": [
-      "$-3x(x-2)$",
-      "$3x(x-2)$",
-      "$-3x(x+2)$",
-      "$-x(3x-6)$"
-    ],
-    "answer": "$-3x(x-2)$",
-    "solution": "先提 $-3x$：$-3x(x-2)$。",
-    "source": "local"
-  },
-  {
-    "id": "EX_G8_CROSS_01",
-    "knowledgeTitle": "十字相乘法",
-    "grade": "初二",
-    "difficulty": 1,
-    "type": "choice",
-    "question": "分解因式：$x^2+5x+6$",
-    "options": [
-      "$(x+2)(x+3)$",
-      "$(x-2)(x-3)$",
-      "$(x+1)(x+6)$",
-      "$(x+2)(x-3)$"
-    ],
-    "answer": "$(x+2)(x+3)$",
-    "solution": "找两数积为 $6$、和为 $5$：$2$ 和 $3$，所以是 $(x+2)(x+3)$。",
-    "source": "local"
-  },
-  {
-    "id": "EX_G8_CROSS_02",
-    "knowledgeTitle": "十字相乘法",
-    "grade": "初二",
-    "difficulty": 2,
-    "type": "choice",
-    "question": "分解因式：$x^2-7x+12$",
-    "options": [
-      "$(x-3)(x-4)$",
-      "$(x+3)(x+4)$",
-      "$(x-2)(x-6)$",
-      "$(x-1)(x-12)$"
-    ],
-    "answer": "$(x-3)(x-4)$",
-    "solution": "找两数积为 $12$、和为 $-7$：$-3$ 和 $-4$。",
-    "source": "local"
-  },
-  {
-    "id": "EX_G8_CROSS_03",
-    "knowledgeTitle": "十字相乘法",
-    "grade": "初二",
-    "difficulty": 3,
-    "type": "choice",
-    "question": "分解因式：$2x^2+5x+3$",
-    "options": [
-      "$(2x+3)(x+1)$",
-      "$(2x+1)(x+3)$",
-      "$(2x-3)(x-1)$",
-      "$(x+3)(2x+1)$"
-    ],
-    "answer": "$(2x+3)(x+1)$",
-    "solution": "十字相乘：$2x\\cdot1+3\\cdot x=5x$，所以是 $(2x+3)(x+1)$。",
-    "source": "local"
-  },
-  {
-    "id": "EX_G8_RAD_01",
-    "knowledgeTitle": "二次根式乘除",
-    "grade": "初二",
-    "difficulty": 1,
-    "type": "choice",
-    "question": "计算：$\\sqrt{2}\\cdot\\sqrt{8}$",
-    "options": [
-      "$4$",
-      "$2$",
-      "$8$",
-      "$16$"
-    ],
-    "answer": "$4$",
-    "solution": "$\\sqrt{2}\\cdot\\sqrt{8}=\\sqrt{16}=4$。",
-    "source": "local"
-  },
-  {
-    "id": "EX_G8_RAD_02",
-    "knowledgeTitle": "二次根式乘除",
-    "grade": "初二",
-    "difficulty": 2,
-    "type": "choice",
-    "question": "计算：$\\sqrt{12}\\div\\sqrt{3}$",
-    "options": [
-      "$2$",
-      "$4$",
-      "$\\sqrt{3}$",
-      "$6$"
-    ],
-    "answer": "$2$",
-    "solution": "$\\sqrt{12}\\div\\sqrt{3}=\\sqrt{4}=2$。",
-    "source": "local"
-  },
-  {
-    "id": "EX_G8_RAD_03",
-    "knowledgeTitle": "二次根式乘除",
-    "grade": "初二",
-    "difficulty": 3,
-    "type": "choice",
-    "question": "计算：$\\sqrt{18}\\cdot\\sqrt{2}$",
-    "options": [
-      "$6$",
-      "$3$",
-      "$9$",
-      "$36$"
-    ],
-    "answer": "$6$",
-    "solution": "$\\sqrt{18}\\cdot\\sqrt{2}=\\sqrt{36}=6$。",
-    "source": "local"
-  }
+ {
+  "id": "EX_G7_ADD_01",
+  "knowledgeTitle": "有理数加法",
+  "grade": "初一",
+  "difficulty": 1,
+  "type": "choice",
+  "question": "计算：$(-3)+(-5)$",
+  "options": [
+   "$-8$",
+   "$8$",
+   "$-2$",
+   "$2$"
+  ],
+  "answer": "$-8$",
+  "solution": "同号相加，取相同符号，绝对值相加：$-(3+5)=-8$。",
+  "source": "local",
+  "knowledgeId": "KB_A_G7_K033"
+ },
+ {
+  "id": "EX_G7_ADD_02",
+  "knowledgeTitle": "有理数加法",
+  "grade": "初一",
+  "difficulty": 2,
+  "type": "choice",
+  "question": "计算：$(-7)+4$",
+  "options": [
+   "$-3$",
+   "$3$",
+   "$-11$",
+   "$11$"
+  ],
+  "answer": "$-3$",
+  "solution": "异号相加，取绝对值较大的符号，再用较大绝对值减较小绝对值：$-(7-4)=-3$。",
+  "source": "local",
+  "knowledgeId": "KB_A_G7_K033"
+ },
+ {
+  "id": "EX_G7_ADD_03",
+  "knowledgeTitle": "有理数加法",
+  "grade": "初一",
+  "difficulty": 3,
+  "type": "choice",
+  "question": "计算：$5+(-12)+7$",
+  "options": [
+   "$0$",
+   "$24$",
+   "$-24$",
+   "$14$"
+  ],
+  "answer": "$0$",
+  "solution": "先算 $5+7=12$，再算 $12+(-12)=0$。",
+  "source": "local",
+  "knowledgeId": "KB_A_G7_K033"
+ },
+ {
+  "id": "EX_G7_SUB_01",
+  "knowledgeTitle": "有理数减法",
+  "grade": "初一",
+  "difficulty": 1,
+  "type": "choice",
+  "question": "计算：$3-(-5)$",
+  "options": [
+   "$8$",
+   "$-8$",
+   "$-2$",
+   "$2$"
+  ],
+  "answer": "$8$",
+  "solution": "减去一个数等于加上它的相反数：$3+5=8$。",
+  "source": "local",
+  "knowledgeId": "KB_A_G7_K034"
+ },
+ {
+  "id": "EX_G7_SUB_02",
+  "knowledgeTitle": "有理数减法",
+  "grade": "初一",
+  "difficulty": 2,
+  "type": "choice",
+  "question": "计算：$-4-6$",
+  "options": [
+   "$-10$",
+   "$10$",
+   "$-2$",
+   "$2$"
+  ],
+  "answer": "$-10$",
+  "solution": "$-4-6=-4+(-6)=-10$。",
+  "source": "local",
+  "knowledgeId": "KB_A_G7_K034"
+ },
+ {
+  "id": "EX_G7_SUB_03",
+  "knowledgeTitle": "有理数减法",
+  "grade": "初一",
+  "difficulty": 3,
+  "type": "choice",
+  "question": "计算：$-2-(-7)$",
+  "options": [
+   "$5$",
+   "$-5$",
+   "$9$",
+   "$-9$"
+  ],
+  "answer": "$5$",
+  "solution": "$-2+7=5$。",
+  "source": "local",
+  "knowledgeId": "KB_A_G7_K034"
+ },
+ {
+  "id": "EX_G7_MUL_01",
+  "knowledgeTitle": "有理数乘法",
+  "grade": "初一",
+  "difficulty": 1,
+  "type": "choice",
+  "question": "计算：$(-3)\\times 4$",
+  "options": [
+   "$-12$",
+   "$12$",
+   "$-7$",
+   "$7$"
+  ],
+  "answer": "$-12$",
+  "solution": "异号相乘得负，绝对值相乘：$-(3\\times 4)=-12$。",
+  "source": "local",
+  "knowledgeId": "KB_A_G7_K035"
+ },
+ {
+  "id": "EX_G7_MUL_02",
+  "knowledgeTitle": "有理数乘法",
+  "grade": "初一",
+  "difficulty": 2,
+  "type": "choice",
+  "question": "计算：$(-5)\\times(-6)$",
+  "options": [
+   "$30$",
+   "$-30$",
+   "$-11$",
+   "$11$"
+  ],
+  "answer": "$30$",
+  "solution": "同号相乘得正，绝对值相乘：$5\\times 6=30$。",
+  "source": "local",
+  "knowledgeId": "KB_A_G7_K035"
+ },
+ {
+  "id": "EX_G7_MUL_03",
+  "knowledgeTitle": "有理数乘法",
+  "grade": "初一",
+  "difficulty": 3,
+  "type": "choice",
+  "question": "计算：$(-2)\\times 3\\times(-5)$",
+  "options": [
+   "$30$",
+   "$-30$",
+   "$10$",
+   "$-10$"
+  ],
+  "answer": "$30$",
+  "solution": "先定符号：两个负号得正；再算 $2\\times 3\\times 5=30$。",
+  "source": "local",
+  "knowledgeId": "KB_A_G7_K035"
+ },
+ {
+  "id": "EX_G7_DIV_01",
+  "knowledgeTitle": "有理数除法",
+  "grade": "初一",
+  "difficulty": 1,
+  "type": "choice",
+  "question": "计算：$(-12)\\div 3$",
+  "options": [
+   "$-4$",
+   "$4$",
+   "$-9$",
+   "$9$"
+  ],
+  "answer": "$-4$",
+  "solution": "异号相除得负，$12\\div 3=4$，所以结果是 $-4$。",
+  "source": "local",
+  "knowledgeId": "KB_A_G7_K036"
+ },
+ {
+  "id": "EX_G7_DIV_02",
+  "knowledgeTitle": "有理数除法",
+  "grade": "初一",
+  "difficulty": 2,
+  "type": "choice",
+  "question": "计算：$(-36)\\div(-9)$",
+  "options": [
+   "$4$",
+   "$-4$",
+   "$27$",
+   "$-27$"
+  ],
+  "answer": "$4$",
+  "solution": "同号相除得正，$36\\div 9=4$。",
+  "source": "local",
+  "knowledgeId": "KB_A_G7_K036"
+ },
+ {
+  "id": "EX_G7_DIV_03",
+  "knowledgeTitle": "有理数除法",
+  "grade": "初一",
+  "difficulty": 3,
+  "type": "choice",
+  "question": "计算：$\\left(-\\frac{3}{4}\\right)\\div\\frac{3}{8}$",
+  "options": [
+   "$-2$",
+   "$2$",
+   "$-\\frac{1}{2}$",
+   "$\\frac{1}{2}$"
+  ],
+  "answer": "$-2$",
+  "solution": "除以一个分数等于乘它的倒数：$-\\frac{3}{4}\\times\\frac{8}{3}=-2$。",
+  "source": "local",
+  "knowledgeId": "KB_A_G7_K036"
+ },
+ {
+  "id": "EX_G7_POW_01",
+  "knowledgeTitle": "有理数乘方",
+  "grade": "初一",
+  "difficulty": 1,
+  "type": "choice",
+  "question": "计算：$(-2)^3$",
+  "options": [
+   "$-8$",
+   "$8$",
+   "$-6$",
+   "$6$"
+  ],
+  "answer": "$-8$",
+  "solution": "$(-2)^3=(-2)\\times(-2)\\times(-2)=-8$。",
+  "source": "local",
+  "knowledgeId": "KB_A_G7_K037"
+ },
+ {
+  "id": "EX_G7_POW_02",
+  "knowledgeTitle": "有理数乘方",
+  "grade": "初一",
+  "difficulty": 2,
+  "type": "choice",
+  "question": "计算：$-3^2$",
+  "options": [
+   "$-9$",
+   "$9$",
+   "$-6$",
+   "$6$"
+  ],
+  "answer": "$-9$",
+  "solution": "$3^2=9$，前面的负号保留，所以是 $-9$。",
+  "source": "local",
+  "knowledgeId": "KB_A_G7_K037"
+ },
+ {
+  "id": "EX_G7_POW_03",
+  "knowledgeTitle": "有理数乘方",
+  "grade": "初一",
+  "difficulty": 3,
+  "type": "choice",
+  "question": "计算：$\\left(-\\frac{1}{2}\\right)^3$",
+  "options": [
+   "$-\\frac{1}{8}$",
+   "$\\frac{1}{8}$",
+   "$-\\frac{1}{6}$",
+   "$\\frac{1}{6}$"
+  ],
+  "answer": "$-\\frac{1}{8}$",
+  "solution": "$(-1)^3=-1$，$2^3=8$，所以是 $-\\frac{1}{8}$。",
+  "source": "local",
+  "knowledgeId": "KB_A_G7_K037"
+ },
+ {
+  "id": "EX_G7_LIKE_01",
+  "knowledgeTitle": "合并同类项",
+  "grade": "初一",
+  "difficulty": 1,
+  "type": "choice",
+  "question": "化简：$3x+2y-5x+4y$",
+  "options": [
+   "$-2x+6y$",
+   "$2x+6y$",
+   "$-2x-6y$",
+   "$8x+6y$"
+  ],
+  "answer": "$-2x+6y$",
+  "solution": "合并 $x$ 项：$3x-5x=-2x$；合并 $y$ 项：$2y+4y=6y$。",
+  "source": "local",
+  "knowledgeId": "KB_A_G7_K039"
+ },
+ {
+  "id": "EX_G7_LIKE_02",
+  "knowledgeTitle": "合并同类项",
+  "grade": "初一",
+  "difficulty": 2,
+  "type": "choice",
+  "question": "化简：$5a^2-3a+2a^2+4a$",
+  "options": [
+   "$7a^2+a$",
+   "$7a^2-a$",
+   "$3a^2+a$",
+   "$7a^4+a$"
+  ],
+  "answer": "$7a^2+a$",
+  "solution": "$a^2$ 项：$5a^2+2a^2=7a^2$；$a$ 项：$-3a+4a=a$。",
+  "source": "local",
+  "knowledgeId": "KB_A_G7_K039"
+ },
+ {
+  "id": "EX_G7_LIKE_03",
+  "knowledgeTitle": "合并同类项",
+  "grade": "初一",
+  "difficulty": 3,
+  "type": "choice",
+  "question": "化简：$2(x-3y)-3(x-2y)$",
+  "options": [
+   "$-x$",
+   "$x$",
+   "$-x-12y$",
+   "$-5x$"
+  ],
+  "answer": "$-x$",
+  "solution": "去括号：$2x-6y-3x+6y$，$x$ 项 $-x$，$y$ 项为 $0$。",
+  "source": "local",
+  "knowledgeId": "KB_A_G7_K039"
+ },
+ {
+  "id": "EX_G7_BRACKET_01",
+  "knowledgeTitle": "去括号法则",
+  "grade": "初一",
+  "difficulty": 1,
+  "type": "choice",
+  "question": "去括号：$a+(b-c)$",
+  "options": [
+   "$a+b-c$",
+   "$a-b+c$",
+   "$a-b-c$",
+   "$a+b+c$"
+  ],
+  "answer": "$a+b-c$",
+  "solution": "括号前是 $+$，去括号后符号不变。",
+  "source": "local",
+  "knowledgeId": "KB_A_G7_K040"
+ },
+ {
+  "id": "EX_G7_BRACKET_02",
+  "knowledgeTitle": "去括号法则",
+  "grade": "初一",
+  "difficulty": 2,
+  "type": "choice",
+  "question": "去括号：$a-(b-c)$",
+  "options": [
+   "$a-b+c$",
+   "$a+b-c$",
+   "$a+b+c$",
+   "$a-b-c$"
+  ],
+  "answer": "$a-b+c$",
+  "solution": "括号前是 $-$，去括号后括号内各项都变号。",
+  "source": "local",
+  "knowledgeId": "KB_A_G7_K040"
+ },
+ {
+  "id": "EX_G7_BRACKET_03",
+  "knowledgeTitle": "去括号法则",
+  "grade": "初一",
+  "difficulty": 3,
+  "type": "choice",
+  "question": "去括号：$-2(3x-4y+1)$",
+  "options": [
+   "$-6x+8y-2$",
+   "$-6x-8y-2$",
+   "$6x+8y-2$",
+   "$-6x+8y+2$"
+  ],
+  "answer": "$-6x+8y-2$",
+  "solution": "用 $-2$ 乘括号内每一项：$-6x+8y-2$。",
+  "source": "local",
+  "knowledgeId": "KB_A_G7_K040"
+ },
+ {
+  "id": "EX_G7_EQ_01",
+  "knowledgeTitle": "一元一次方程解法",
+  "grade": "初一",
+  "difficulty": 1,
+  "type": "choice",
+  "question": "解方程：$2x+5=13$",
+  "options": [
+   "$x=4$",
+   "$x=9$",
+   "$x=6.5$",
+   "$x=-4$"
+  ],
+  "answer": "$x=4$",
+  "solution": "移项：$2x=8$，两边除以 $2$：$x=4$。",
+  "source": "local",
+  "knowledgeId": "KB_A_G7_K043"
+ },
+ {
+  "id": "EX_G7_EQ_02",
+  "knowledgeTitle": "一元一次方程解法",
+  "grade": "初一",
+  "difficulty": 2,
+  "type": "choice",
+  "question": "解方程：$3x-7=8$",
+  "options": [
+   "$x=5$",
+   "$x=3$",
+   "$x=\\frac{1}{3}$",
+   "$x=15$"
+  ],
+  "answer": "$x=5$",
+  "solution": "移项：$3x=15$，两边除以 $3$：$x=5$。",
+  "source": "local",
+  "knowledgeId": "KB_A_G7_K043"
+ },
+ {
+  "id": "EX_G7_EQ_03",
+  "knowledgeTitle": "一元一次方程解法",
+  "grade": "初一",
+  "difficulty": 3,
+  "type": "choice",
+  "question": "解方程：$\\frac{x-1}{2}+1=3$",
+  "options": [
+   "$x=5$",
+   "$x=3$",
+   "$x=7$",
+   "$x=4$"
+  ],
+  "answer": "$x=5$",
+  "solution": "先移项：$\\frac{x-1}{2}=2$，去分母得 $x-1=4$，所以 $x=5$。",
+  "source": "local",
+  "knowledgeId": "KB_A_G7_K043"
+ },
+ {
+  "id": "EX_G7_MOVE_01",
+  "knowledgeTitle": "移项法则",
+  "grade": "初一",
+  "difficulty": 1,
+  "type": "choice",
+  "question": "解方程：$2x+3=7x-12$",
+  "options": [
+   "$x=3$",
+   "$x=-3$",
+   "$x=5$",
+   "$x=-5$"
+  ],
+  "answer": "$x=3$",
+  "solution": "移项：$3+12=7x-2x$，即 $15=5x$，所以 $x=3$。",
+  "source": "local",
+  "knowledgeId": "KB_A_G7_K045"
+ },
+ {
+  "id": "EX_G7_MOVE_02",
+  "knowledgeTitle": "移项法则",
+  "grade": "初一",
+  "difficulty": 2,
+  "type": "choice",
+  "question": "解方程：$5x-4=2x+8$",
+  "options": [
+   "$x=4$",
+   "$x=12$",
+   "$x=\\frac{4}{3}$",
+   "$x=-4$"
+  ],
+  "answer": "$x=4$",
+  "solution": "移项：$5x-2x=8+4$，$3x=12$，所以 $x=4$。",
+  "source": "local",
+  "knowledgeId": "KB_A_G7_K045"
+ },
+ {
+  "id": "EX_G7_MOVE_03",
+  "knowledgeTitle": "移项法则",
+  "grade": "初一",
+  "difficulty": 3,
+  "type": "choice",
+  "question": "解方程：$3(x-2)=2x+1$",
+  "options": [
+   "$x=7$",
+   "$x=5$",
+   "$x=-7$",
+   "$x=1$"
+  ],
+  "answer": "$x=7$",
+  "solution": "去括号：$3x-6=2x+1$，移项得 $x=7$。",
+  "source": "local",
+  "knowledgeId": "KB_A_G7_K045"
+ },
+ {
+  "id": "EX_G7_SUB_SYS_01",
+  "knowledgeTitle": "代入消元法",
+  "grade": "初一",
+  "difficulty": 1,
+  "type": "choice",
+  "question": "解方程组：$\\begin{cases}x+y=5\\\\x-y=1\\end{cases}$",
+  "options": [
+   "$x=3,\\ y=2$",
+   "$x=2,\\ y=3$",
+   "$x=4,\\ y=1$",
+   "$x=1,\\ y=4$"
+  ],
+  "answer": "$x=3,\\ y=2$",
+  "solution": "两式相加得 $2x=6$，$x=3$；代回 $x+y=5$ 得 $y=2$。",
+  "source": "local",
+  "knowledgeId": "KB_A_G7_K047"
+ },
+ {
+  "id": "EX_G7_SUB_SYS_02",
+  "knowledgeTitle": "代入消元法",
+  "grade": "初一",
+  "difficulty": 2,
+  "type": "choice",
+  "question": "解方程组：$\\begin{cases}y=2x\\\\x+y=9\\end{cases}$",
+  "options": [
+   "$x=3,\\ y=6$",
+   "$x=6,\\ y=3$",
+   "$x=2,\\ y=4$",
+   "$x=4,\\ y=8$"
+  ],
+  "answer": "$x=3,\\ y=6$",
+  "solution": "把 $y=2x$ 代入 $x+y=9$：$3x=9$，$x=3$，所以 $y=6$。",
+  "source": "local",
+  "knowledgeId": "KB_A_G7_K047"
+ },
+ {
+  "id": "EX_G7_SUB_SYS_03",
+  "knowledgeTitle": "代入消元法",
+  "grade": "初一",
+  "difficulty": 3,
+  "type": "choice",
+  "question": "解方程组：$\\begin{cases}2x+y=7\\\\y=x+1\\end{cases}$",
+  "options": [
+   "$x=2,\\ y=3$",
+   "$x=3,\\ y=2$",
+   "$x=1,\\ y=2$",
+   "$x=2,\\ y=1$"
+  ],
+  "answer": "$x=2,\\ y=3$",
+  "solution": "把 $y=x+1$ 代入：$2x+x+1=7$，$3x=6$，$x=2$，所以 $y=3$。",
+  "source": "local",
+  "knowledgeId": "KB_A_G7_K047"
+ },
+ {
+  "id": "EX_G7_ADD_SYS_01",
+  "knowledgeTitle": "加减消元法",
+  "grade": "初一",
+  "difficulty": 1,
+  "type": "choice",
+  "question": "解方程组：$\\begin{cases}2x+y=7\\\\x-y=2\\end{cases}$",
+  "options": [
+   "$x=3,\\ y=1$",
+   "$x=1,\\ y=3$",
+   "$x=2,\\ y=3$",
+   "$x=3,\\ y=2$"
+  ],
+  "answer": "$x=3,\\ y=1$",
+  "solution": "两式相加消去 $y$：$3x=9$，$x=3$；代回得 $y=1$。",
+  "source": "local",
+  "knowledgeId": "KB_A_G7_K048"
+ },
+ {
+  "id": "EX_G7_ADD_SYS_02",
+  "knowledgeTitle": "加减消元法",
+  "grade": "初一",
+  "difficulty": 2,
+  "type": "choice",
+  "question": "解方程组：$\\begin{cases}3x+2y=12\\\\3x-2y=0\\end{cases}$",
+  "options": [
+   "$x=2,\\ y=3$",
+   "$x=3,\\ y=2$",
+   "$x=2,\\ y=1$",
+   "$x=4,\\ y=0$"
+  ],
+  "answer": "$x=2,\\ y=3$",
+  "solution": "两式相加：$6x=12$，$x=2$；代回 $3\\times2+2y=12$ 得 $y=3$。",
+  "source": "local",
+  "knowledgeId": "KB_A_G7_K048"
+ },
+ {
+  "id": "EX_G7_ADD_SYS_03",
+  "knowledgeTitle": "加减消元法",
+  "grade": "初一",
+  "difficulty": 3,
+  "type": "choice",
+  "question": "解方程组：$\\begin{cases}4x+3y=18\\\\2x-3y=0\\end{cases}$",
+  "options": [
+   "$x=3,\\ y=2$",
+   "$x=2,\\ y=3$",
+   "$x=3,\\ y=1$",
+   "$x=4,\\ y=2$"
+  ],
+  "answer": "$x=3,\\ y=2$",
+  "solution": "两式相加：$6x=18$，$x=3$；代回 $2\\times3-3y=0$ 得 $y=2$。",
+  "source": "local",
+  "knowledgeId": "KB_A_G7_K048"
+ },
+ {
+  "id": "EX_G7_INEQ_01",
+  "knowledgeTitle": "一元一次不等式解集",
+  "grade": "初一",
+  "difficulty": 1,
+  "type": "choice",
+  "question": "解不等式：$2x-3<5$",
+  "options": [
+   "$x<4$",
+   "$x>4$",
+   "$x<1$",
+   "$x>1$"
+  ],
+  "answer": "$x<4$",
+  "solution": "移项：$2x<8$，两边除以 $2$：$x<4$。",
+  "source": "local",
+  "knowledgeId": "KB_A_G7_K052"
+ },
+ {
+  "id": "EX_G7_INEQ_02",
+  "knowledgeTitle": "一元一次不等式解集",
+  "grade": "初一",
+  "difficulty": 2,
+  "type": "choice",
+  "question": "解不等式：$-3x\\geq 9$",
+  "options": [
+   "$x\\leq -3$",
+   "$x\\geq -3$",
+   "$x\\leq 3$",
+   "$x\\geq 3$"
+  ],
+  "answer": "$x\\leq -3$",
+  "solution": "两边除以 $-3$，不等号方向改变：$x\\leq -3$。",
+  "source": "local",
+  "knowledgeId": "KB_A_G7_K052"
+ },
+ {
+  "id": "EX_G7_INEQ_03",
+  "knowledgeTitle": "一元一次不等式解集",
+  "grade": "初一",
+  "difficulty": 3,
+  "type": "choice",
+  "question": "解不等式：$2(x-1)\\leq 3x+1$",
+  "options": [
+   "$x\\geq -3$",
+   "$x\\leq -3$",
+   "$x\\geq 3$",
+   "$x\\leq 3$"
+  ],
+  "answer": "$x\\geq -3$",
+  "solution": "去括号：$2x-2\\leq 3x+1$，移项得 $-3\\leq x$，即 $x\\geq -3$。",
+  "source": "local",
+  "knowledgeId": "KB_A_G7_K052"
+ },
+ {
+  "id": "EX_G8_POWMUL_01",
+  "knowledgeTitle": "同底数幂乘法",
+  "grade": "初二",
+  "difficulty": 1,
+  "type": "choice",
+  "question": "计算：$a^2\\cdot a^3$",
+  "options": [
+   "$a^5$",
+   "$a^6$",
+   "$a^8$",
+   "$2a^5$"
+  ],
+  "answer": "$a^5$",
+  "solution": "同底数幂相乘，底数不变，指数相加：$a^{2+3}=a^5$。",
+  "source": "local",
+  "knowledgeId": "KB_A_G7_K054"
+ },
+ {
+  "id": "EX_G8_POWMUL_02",
+  "knowledgeTitle": "同底数幂乘法",
+  "grade": "初二",
+  "difficulty": 2,
+  "type": "choice",
+  "question": "计算：$x^4\\cdot x$",
+  "options": [
+   "$x^5$",
+   "$x^4$",
+   "$x^8$",
+   "$2x^4$"
+  ],
+  "answer": "$x^5$",
+  "solution": "$x$ 的指数是 $1$，$x^{4+1}=x^5$。",
+  "source": "local",
+  "knowledgeId": "KB_A_G7_K054"
+ },
+ {
+  "id": "EX_G8_POWMUL_03",
+  "knowledgeTitle": "同底数幂乘法",
+  "grade": "初二",
+  "difficulty": 3,
+  "type": "choice",
+  "question": "计算：$(-a)^2\\cdot a^3$",
+  "options": [
+   "$a^5$",
+   "$-a^5$",
+   "$a^6$",
+   "$-a^6$"
+  ],
+  "answer": "$a^5$",
+  "solution": "$(-a)^2=a^2$，再与 $a^3$ 相乘得 $a^5$。",
+  "source": "local",
+  "knowledgeId": "KB_A_G7_K054"
+ },
+ {
+  "id": "EX_G8_POWPOW_01",
+  "knowledgeTitle": "幂的乘方",
+  "grade": "初二",
+  "difficulty": 1,
+  "type": "choice",
+  "question": "计算：$(a^2)^3$",
+  "options": [
+   "$a^6$",
+   "$a^5$",
+   "$a^8$",
+   "$a^9$"
+  ],
+  "answer": "$a^6$",
+  "solution": "幂的乘方，底数不变，指数相乘：$a^{2\\times3}=a^6$。",
+  "source": "local",
+  "knowledgeId": "KB_A_G7_K056"
+ },
+ {
+  "id": "EX_G8_POWPOW_02",
+  "knowledgeTitle": "幂的乘方",
+  "grade": "初二",
+  "difficulty": 2,
+  "type": "choice",
+  "question": "计算：$(x^3)^4$",
+  "options": [
+   "$x^{12}$",
+   "$x^7$",
+   "$x^{64}$",
+   "$x^{9}$"
+  ],
+  "answer": "$x^{12}$",
+  "solution": "$x^{3\\times4}=x^{12}$。",
+  "source": "local",
+  "knowledgeId": "KB_A_G7_K056"
+ },
+ {
+  "id": "EX_G8_POWPOW_03",
+  "knowledgeTitle": "幂的乘方",
+  "grade": "初二",
+  "difficulty": 3,
+  "type": "choice",
+  "question": "计算：$(-a^2)^3$",
+  "options": [
+   "$-a^6$",
+   "$a^6$",
+   "$-a^5$",
+   "$a^5$"
+  ],
+  "answer": "$-a^6$",
+  "solution": "$a^2$ 先乘方得 $a^6$，外面的负号保留：$-a^6$。",
+  "source": "local",
+  "knowledgeId": "KB_A_G7_K056"
+ },
+ {
+  "id": "EX_G8_PRODPOW_01",
+  "knowledgeTitle": "积的乘方",
+  "grade": "初二",
+  "difficulty": 1,
+  "type": "choice",
+  "question": "计算：$(2x)^3$",
+  "options": [
+   "$8x^3$",
+   "$2x^3$",
+   "$6x^3$",
+   "$8x$"
+  ],
+  "answer": "$8x^3$",
+  "solution": "每个因式分别乘方：$2^3\\cdot x^3=8x^3$。",
+  "source": "local",
+  "knowledgeId": "KB_A_G7_K057"
+ },
+ {
+  "id": "EX_G8_PRODPOW_02",
+  "knowledgeTitle": "积的乘方",
+  "grade": "初二",
+  "difficulty": 2,
+  "type": "choice",
+  "question": "计算：$(-3a^2)^2$",
+  "options": [
+   "$9a^4$",
+   "$-9a^4$",
+   "$6a^4$",
+   "$9a^2$"
+  ],
+  "answer": "$9a^4$",
+  "solution": "$(-3)^2=9$，$(a^2)^2=a^4$，所以是 $9a^4$。",
+  "source": "local",
+  "knowledgeId": "KB_A_G7_K057"
+ },
+ {
+  "id": "EX_G8_PRODPOW_03",
+  "knowledgeTitle": "积的乘方",
+  "grade": "初二",
+  "difficulty": 3,
+  "type": "choice",
+  "question": "计算：$(ab^2)^3$",
+  "options": [
+   "$a^3b^6$",
+   "$a^3b^2$",
+   "$ab^6$",
+   "$a^3b^8$"
+  ],
+  "answer": "$a^3b^6$",
+  "solution": "$a^3\\cdot (b^2)^3=a^3b^6$。",
+  "source": "local",
+  "knowledgeId": "KB_A_G7_K057"
+ },
+ {
+  "id": "EX_G8_SQDIFF_01",
+  "knowledgeTitle": "平方差公式",
+  "grade": "初二",
+  "difficulty": 1,
+  "type": "choice",
+  "question": "计算：$(x+3)(x-3)$",
+  "options": [
+   "$x^2-9$",
+   "$x^2+9$",
+   "$x^2-6x+9$",
+   "$x^2-3$"
+  ],
+  "answer": "$x^2-9$",
+  "solution": "平方差公式：$(a+b)(a-b)=a^2-b^2$，所以是 $x^2-9$。",
+  "source": "local",
+  "knowledgeId": "KB_A_G7_K062"
+ },
+ {
+  "id": "EX_G8_SQDIFF_02",
+  "knowledgeTitle": "平方差公式",
+  "grade": "初二",
+  "difficulty": 2,
+  "type": "choice",
+  "question": "计算：$(2a+b)(2a-b)$",
+  "options": [
+   "$4a^2-b^2$",
+   "$2a^2-b^2$",
+   "$4a^2+b^2$",
+   "$4a^2-4ab+b^2$"
+  ],
+  "answer": "$4a^2-b^2$",
+  "solution": "$(2a)^2-b^2=4a^2-b^2$。",
+  "source": "local",
+  "knowledgeId": "KB_A_G7_K062"
+ },
+ {
+  "id": "EX_G8_SQDIFF_03",
+  "knowledgeTitle": "平方差公式",
+  "grade": "初二",
+  "difficulty": 3,
+  "type": "choice",
+  "question": "计算：$101\\times99$",
+  "options": [
+   "$9999$",
+   "$10000$",
+   "$9998$",
+   "$10100$"
+  ],
+  "answer": "$9999$",
+  "solution": "写成 $(100+1)(100-1)=100^2-1=9999$。",
+  "source": "local",
+  "knowledgeId": "KB_A_G7_K062"
+ },
+ {
+  "id": "EX_G8_SQSUM_01",
+  "knowledgeTitle": "完全平方公式",
+  "grade": "初二",
+  "difficulty": 1,
+  "type": "choice",
+  "question": "计算：$(x+2)^2$",
+  "options": [
+   "$x^2+4x+4$",
+   "$x^2+4$",
+   "$x^2+2x+4$",
+   "$x^2-4x+4$"
+  ],
+  "answer": "$x^2+4x+4$",
+  "solution": "$(a+b)^2=a^2+2ab+b^2$，所以是 $x^2+4x+4$。",
+  "source": "local",
+  "knowledgeId": "KB_A_G7_K063"
+ },
+ {
+  "id": "EX_G8_SQSUM_02",
+  "knowledgeTitle": "完全平方公式",
+  "grade": "初二",
+  "difficulty": 2,
+  "type": "choice",
+  "question": "计算：$(3a-1)^2$",
+  "options": [
+   "$9a^2-6a+1$",
+   "$9a^2+6a+1$",
+   "$9a^2-1$",
+   "$3a^2-6a+1$"
+  ],
+  "answer": "$9a^2-6a+1$",
+  "solution": "$(a-b)^2=a^2-2ab+b^2$：$9a^2-6a+1$。",
+  "source": "local",
+  "knowledgeId": "KB_A_G7_K063"
+ },
+ {
+  "id": "EX_G8_SQSUM_03",
+  "knowledgeTitle": "完全平方公式",
+  "grade": "初二",
+  "difficulty": 3,
+  "type": "choice",
+  "question": "计算：$(x-2y)^2$",
+  "options": [
+   "$x^2-4xy+4y^2$",
+   "$x^2+4xy+4y^2$",
+   "$x^2-4y^2$",
+   "$x^2-2xy+4y^2$"
+  ],
+  "answer": "$x^2-4xy+4y^2$",
+  "solution": "$x^2-2\\cdot x\\cdot2y+(2y)^2=x^2-4xy+4y^2$。",
+  "source": "local",
+  "knowledgeId": "KB_A_G7_K063"
+ },
+ {
+  "id": "EX_G8_GCF_01",
+  "knowledgeTitle": "提公因式法",
+  "grade": "初二",
+  "difficulty": 1,
+  "type": "choice",
+  "question": "分解因式：$6x^2+9x$",
+  "options": [
+   "$3x(2x+3)$",
+   "$3(2x^2+3x)$",
+   "$x(6x+9)$",
+   "$3x(2x+9)$"
+  ],
+  "answer": "$3x(2x+3)$",
+  "solution": "公因式是 $3x$，提取后得 $3x(2x+3)$。",
+  "source": "local",
+  "knowledgeId": "KB_A_G7_K066"
+ },
+ {
+  "id": "EX_G8_GCF_02",
+  "knowledgeTitle": "提公因式法",
+  "grade": "初二",
+  "difficulty": 2,
+  "type": "choice",
+  "question": "分解因式：$4a^3b-8a^2b^2$",
+  "options": [
+   "$4a^2b(a-2b)$",
+   "$4a^2b(a-2)$",
+   "$2a^2b(2a-4b)$",
+   "$4ab(a^2-2ab)$"
+  ],
+  "answer": "$4a^2b(a-2b)$",
+  "solution": "公因式是 $4a^2b$，提取后得 $4a^2b(a-2b)$。",
+  "source": "local",
+  "knowledgeId": "KB_A_G7_K066"
+ },
+ {
+  "id": "EX_G8_GCF_03",
+  "knowledgeTitle": "提公因式法",
+  "grade": "初二",
+  "difficulty": 3,
+  "type": "choice",
+  "question": "分解因式：$-3x^2+6x$",
+  "options": [
+   "$-3x(x-2)$",
+   "$3x(x-2)$",
+   "$-3x(x+2)$",
+   "$-x(3x-6)$"
+  ],
+  "answer": "$-3x(x-2)$",
+  "solution": "先提 $-3x$：$-3x(x-2)$。",
+  "source": "local",
+  "knowledgeId": "KB_A_G7_K066"
+ },
+ {
+  "id": "EX_G8_CROSS_01",
+  "knowledgeTitle": "十字相乘法",
+  "grade": "初二",
+  "difficulty": 1,
+  "type": "choice",
+  "question": "分解因式：$x^2+5x+6$",
+  "options": [
+   "$(x+2)(x+3)$",
+   "$(x-2)(x-3)$",
+   "$(x+1)(x+6)$",
+   "$(x+2)(x-3)$"
+  ],
+  "answer": "$(x+2)(x+3)$",
+  "solution": "找两数积为 $6$、和为 $5$：$2$ 和 $3$，所以是 $(x+2)(x+3)$。",
+  "source": "local",
+  "knowledgeId": "KB_A_G7_K068"
+ },
+ {
+  "id": "EX_G8_CROSS_02",
+  "knowledgeTitle": "十字相乘法",
+  "grade": "初二",
+  "difficulty": 2,
+  "type": "choice",
+  "question": "分解因式：$x^2-7x+12$",
+  "options": [
+   "$(x-3)(x-4)$",
+   "$(x+3)(x+4)$",
+   "$(x-2)(x-6)$",
+   "$(x-1)(x-12)$"
+  ],
+  "answer": "$(x-3)(x-4)$",
+  "solution": "找两数积为 $12$、和为 $-7$：$-3$ 和 $-4$。",
+  "source": "local",
+  "knowledgeId": "KB_A_G7_K068"
+ },
+ {
+  "id": "EX_G8_CROSS_03",
+  "knowledgeTitle": "十字相乘法",
+  "grade": "初二",
+  "difficulty": 3,
+  "type": "choice",
+  "question": "分解因式：$2x^2+5x+3$",
+  "options": [
+   "$(2x+3)(x+1)$",
+   "$(2x+1)(x+3)$",
+   "$(2x-3)(x-1)$",
+   "$(x+3)(2x+1)$"
+  ],
+  "answer": "$(2x+3)(x+1)$",
+  "solution": "十字相乘：$2x\\cdot1+3\\cdot x=5x$，所以是 $(2x+3)(x+1)$。",
+  "source": "local",
+  "knowledgeId": "KB_A_G7_K068"
+ },
+ {
+  "id": "EX_G8_RAD_01",
+  "knowledgeTitle": "二次根式乘除",
+  "grade": "初二",
+  "difficulty": 1,
+  "type": "choice",
+  "question": "计算：$\\sqrt{2}\\cdot\\sqrt{8}$",
+  "options": [
+   "$4$",
+   "$2$",
+   "$8$",
+   "$16$"
+  ],
+  "answer": "$4$",
+  "solution": "$\\sqrt{2}\\cdot\\sqrt{8}=\\sqrt{16}=4$。",
+  "source": "local",
+  "knowledgeId": "KB_A_G7_K081"
+ },
+ {
+  "id": "EX_G8_RAD_02",
+  "knowledgeTitle": "二次根式乘除",
+  "grade": "初二",
+  "difficulty": 2,
+  "type": "choice",
+  "question": "计算：$\\sqrt{12}\\div\\sqrt{3}$",
+  "options": [
+   "$2$",
+   "$4$",
+   "$\\sqrt{3}$",
+   "$6$"
+  ],
+  "answer": "$2$",
+  "solution": "$\\sqrt{12}\\div\\sqrt{3}=\\sqrt{4}=2$。",
+  "source": "local",
+  "knowledgeId": "KB_A_G7_K081"
+ },
+ {
+  "id": "EX_G8_RAD_03",
+  "knowledgeTitle": "二次根式乘除",
+  "grade": "初二",
+  "difficulty": 3,
+  "type": "choice",
+  "question": "计算：$\\sqrt{18}\\cdot\\sqrt{2}$",
+  "options": [
+   "$6$",
+   "$3$",
+   "$9$",
+   "$36$"
+  ],
+  "answer": "$6$",
+  "solution": "$\\sqrt{18}\\cdot\\sqrt{2}=\\sqrt{36}=6$。",
+  "source": "local",
+  "knowledgeId": "KB_A_G7_K081"
+ }
 ]

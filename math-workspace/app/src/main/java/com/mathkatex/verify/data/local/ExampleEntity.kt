@@ -20,4 +20,5 @@ data class ExampleEntity(
     val source: String = "local",
     val type: String = "choice",
     val options: String = "[]",
+    val knowledgeId: String = "",
 )
