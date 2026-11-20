@@ -55,6 +55,7 @@ import androidx.compose.ui.unit.sp
 import com.google.gson.JsonParser
 import com.mathkatex.verify.data.local.ExampleEntity
 import com.mathkatex.verify.data.local.ExampleRepository
+import com.mathkatex.verify.data.local.LearningRepository
 import com.mathkatex.verify.ui.theme.AppColors
 import com.mathkatex.verify.ui.theme.LocalAppColors
 import kotlinx.coroutines.launch
@@ -142,7 +143,10 @@ fun PracticeScreen(knowledgeId: String = "", onBack: () -> Unit = {}) {
                                 val userAnswer = if (example.type == "choice") state.selected else state.fill
                                 val correct = normalizeAnswer(userAnswer) == normalizeAnswer(example.answer)
                                 answers[example.id] = state.copy(submitted = true, correct = correct)
-                                scope.launch { ExampleRepository.record(example.id, correct, userAnswer, example.knowledgeId) }
+                                scope.launch {
+                                    ExampleRepository.record(example.id, correct, userAnswer, example.knowledgeId)
+                                    LearningRepository.onAnswer(example.knowledgeId, correct)
+                                }
                             },
                             onToggleFavorite = {
                                 val next = example.id !in favorites

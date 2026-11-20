@@ -38,6 +38,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.mathkatex.verify.data.SettingsManager
 import com.mathkatex.verify.data.local.ExampleRepository
+import com.mathkatex.verify.data.local.LearningRepository
 import com.mathkatex.verify.data.local.KnowledgeRepository
 import com.mathkatex.verify.screens.ErrorGuideScreen
 import com.mathkatex.verify.screens.FavoritesScreen
@@ -49,6 +50,7 @@ import com.mathkatex.verify.screens.LibraryScreen
 import com.mathkatex.verify.screens.MineScreen
 import com.mathkatex.verify.screens.PhotoSolveScreen
 import com.mathkatex.verify.screens.RegionSelectScreen
+import com.mathkatex.verify.screens.ReviewScreen
 import com.mathkatex.verify.screens.PracticeScreen
 import com.mathkatex.verify.screens.SearchScreen
 import com.mathkatex.verify.screens.SettingsScreen
@@ -68,6 +70,7 @@ class MainActivity : ComponentActivity() {
             KnowledgeRepository.init(applicationContext)
             // 启动即灌例题，保证知识详情能立刻看到相关例题
             ExampleRepository.init(applicationContext)
+            LearningRepository.init(applicationContext)
         }
 
         setContent {
@@ -97,6 +100,7 @@ sealed class Screen(val route: String, val title: String) {
     object ErrorGuide : Screen("error_guide", "错误辅导")
     object FormulaConvert : Screen("formula_convert", "拍照转公式")
     object Mine : Screen("mine", "我的")
+    object Review : Screen("review", "今日复习")
     object Settings : Screen("settings", "设置")
 }
 

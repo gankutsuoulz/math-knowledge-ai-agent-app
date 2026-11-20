@@ -1,5 +1,17 @@
 package com.mathkatex.verify.screens
 
+import androidx.compose.runtime.setValue
+
+import androidx.compose.runtime.getValue
+
+import androidx.compose.runtime.mutableStateOf
+
+import androidx.compose.runtime.remember
+
+import androidx.compose.material3.CardDefaults
+
+import androidx.compose.material3.Card
+
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -42,6 +54,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.runtime.LaunchedEffect
+import com.mathkatex.verify.data.local.LearningRepository
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -82,6 +97,7 @@ fun HomeScreen(navController: NavHostController) {
         item { HomeHeader(colors, hello) }
         item { PhotoSolveCta(colors) { navController.navigate(Screen.PhotoSolve.route) } }
         item { QuickGrid(colors, navController) }
+        item { ReviewHomeCard(colors) { navController.navigate(Screen.Review.route) } }
         item { ContinueCard(colors) { navController.navigate(Screen.Knowledge.route) } }
         item { DailyStrip(colors) }
     }
@@ -304,6 +320,47 @@ private fun DailyStrip(colors: AppColors) {
             Text("今日目标 2 / 4 题", fontSize = 12.5.sp, fontWeight = FontWeight.SemiBold, color = colors.text)
             Spacer(Modifier.weight(1f))
             Text("约 10 分钟", fontSize = 11.sp, color = colors.text3)
+        }
+    }
+}
+
+
+@Composable
+private fun ReviewHomeCard(colors: AppColors, onClick: () -> Unit) {
+    val context = LocalContext.current
+    var due by remember { mutableStateOf(0) }
+    LaunchedEffect(Unit) {
+        LearningRepository.init(context)
+        due = LearningRepository.dueCount()
+    }
+    Card(
+        modifier = Modifier.fillMaxWidth().clickable { onClick() },
+        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.cardColors(containerColor = colors.surface),
+        border = BorderStroke(1.dp, colors.line),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(15.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Box(
+                modifier = Modifier.size(38.dp).clip(RoundedCornerShape(12.dp)).background(colors.primarySoft),
+                contentAlignment = Alignment.Center,
+            ) { Text("复", fontSize = 15.sp, color = colors.primary, fontWeight = FontWeight.Bold) }
+            Spacer(Modifier.width(12.dp))
+            Column(Modifier.weight(1f)) {
+                Text(
+                    if (due > 0) "今日复习 $due 个知识点" else "今日复习",
+                    fontSize = 14.sp, fontWeight = FontWeight.SemiBold, color = colors.text,
+                )
+                Spacer(Modifier.height(3.dp))
+                Text(
+                    if (due > 0) "按掌握度安排，趁热打铁" else "暂无到期，去练几道新题",
+                    fontSize = 11.5.sp, color = colors.text3,
+                )
+            }
+            Icon(Icons.Default.ChevronRight, contentDescription = null, tint = colors.text3)
         }
     }
 }

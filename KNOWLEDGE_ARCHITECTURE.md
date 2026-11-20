@@ -168,7 +168,8 @@ Room v4 迁移（保留现网数据）：
 - [x] P1 Room v4：`knowledge_edges / aliases / paths / path_items / models` 表 + `examples.knowledgeId / practice_records.knowledgeId / knowledge_points.abilityLevel`；3→4 迁移在旧 release 数据库上验证通过（user_version=4，图谱导入成功）。
 - [x] P2 部分：知识详情接入「常考题型 / 前置 / 相关 / 相关例题 / 练这个知识点」；知识列表改为可点击卡片；练习按 knowledgeId 过滤并把 knowledgeId 写进练习记录；启动即灌例题。
 - [x] P2 剩余：拍照结果知识点 chips 可解析到知识库并弹卡（可去练习）；错题/收藏的知识点标签可跳到该知识点练习。
-- [ ] P3 掌握度/复习/今日三步
+- [x] P3 数据层与首页入口：`mastery` / `review_items`（Room v5）、答题回写掌握度与复习排期（答错当天、答对 1/3/7/14/30 天）、首页「今日复习」卡、复习列表页。
+- [ ] P3 剩余：知识详情掌握度进度条、专题路径页、首页「今日三步」编排、复习完成后的调度联动。
 
 ## 九、立即可做（本周）
 

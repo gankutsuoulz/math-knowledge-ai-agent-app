@@ -18,8 +18,10 @@ import androidx.sqlite.db.SupportSQLiteDatabase
         KnowledgePathEntity::class,
         KnowledgePathItemEntity::class,
         KnowledgeModelEntity::class,
+        MasteryEntity::class,
+        ReviewItemEntity::class,
     ],
-    version = 4,
+    version = 5,
     exportSchema = false,
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -27,6 +29,7 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun exampleDao(): ExampleDao
     abstract fun practiceDao(): PracticeDao
     abstract fun knowledgeGraphDao(): KnowledgeGraphDao
+    abstract fun masteryDao(): MasteryDao
 
     companion object {
         @Volatile
@@ -116,6 +119,23 @@ abstract class AppDatabase : RoomDatabase() {
             }
         }
 
+        /** v4 -> v5：掌握度与复习队列。 */
+        private val MIGRATION_4_5 = object : Migration(4, 5) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    "CREATE TABLE IF NOT EXISTS `mastery` (" +
+                        "`knowledgeId` TEXT NOT NULL, `score` REAL NOT NULL, `attempts` INTEGER NOT NULL, " +
+                        "`correct` INTEGER NOT NULL, `stage` INTEGER NOT NULL, `updatedAt` INTEGER NOT NULL, " +
+                        "`nextReviewAt` INTEGER NOT NULL, PRIMARY KEY(`knowledgeId`))",
+                )
+                db.execSQL(
+                    "CREATE TABLE IF NOT EXISTS `review_items` (" +
+                        "`knowledgeId` TEXT NOT NULL, `dueAt` INTEGER NOT NULL, `stage` INTEGER NOT NULL, " +
+                        "`updatedAt` INTEGER NOT NULL, PRIMARY KEY(`knowledgeId`))",
+                )
+            }
+        }
+
         fun getInstance(context: Context): AppDatabase {
             return INSTANCE ?: synchronized(this) {
                 val instance = Room.databaseBuilder(
@@ -123,7 +143,7 @@ abstract class AppDatabase : RoomDatabase() {
                     AppDatabase::class.java,
                     "math_app.db",
                 )
-                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4)
+                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5)
                     .fallbackToDestructiveMigration()
                     .build()
                 INSTANCE = instance
