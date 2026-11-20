@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.ui.draw.clip
@@ -26,6 +27,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.mathkatex.verify.data.local.ExampleEntity
 import com.mathkatex.verify.data.local.KnowledgeEntity
 import com.mathkatex.verify.data.local.KnowledgeRepository
 import com.mathkatex.verify.ui.theme.AppColors
@@ -40,7 +42,7 @@ import kotlinx.coroutines.withContext
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun KnowledgeScreen() {
+fun KnowledgeScreen(onStartPractice: (String) -> Unit = {}) {
     val context = LocalContext.current
 
     // ── 全量数据状态（一次性加载）──
@@ -164,6 +166,15 @@ fun KnowledgeScreen() {
         when {
             isLoading -> LoadingView(paddingValues, onRetry = { retryCount++ })
             errorMsg.isNotEmpty() -> ErrorView(errorMsg, paddingValues, onRetry = { errorMsg = ""; retryCount++ })
+            selectedKnowledge != null -> {
+                BackHandler { selectedKnowledge = null }
+                KnowledgeDetailContent(
+                    knowledge = selectedKnowledge!!,
+                    onBack = { selectedKnowledge = null },
+                    onStartPractice = onStartPractice,
+                    onOpenKnowledge = { selectedKnowledge = it }
+                )
+            }
             selectedLv2Detail.isNotEmpty() && lv2DetailPoints.isNotEmpty() -> {
                 BackHandler { selectedLv2Detail = "" }
                 Lv2DetailListScreen(
@@ -171,13 +182,6 @@ fun KnowledgeScreen() {
                     knowledgeList = lv2DetailPoints,
                     onBack = { selectedLv2Detail = "" },
                     onKnowledgeClick = { selectedKnowledge = it }
-                )
-            }
-            selectedKnowledge != null -> {
-                BackHandler { selectedKnowledge = null }
-                KnowledgeDetailContent(
-                    knowledge = selectedKnowledge!!,
-                    onBack = { selectedKnowledge = null }
                 )
             }
             else -> ContentView(
@@ -250,40 +254,17 @@ private fun Lv2DetailListScreen(
     onBack: () -> Unit,
     onKnowledgeClick: (KnowledgeEntity) -> Unit
 ) {
-    val fullMarkdown = remember(knowledgeList) {
-        buildString {
-            val sorted = knowledgeList.sortedBy { it.id }
-            sorted.groupBy { it.categoryLv3.ifEmpty { it.title } }
-                .forEach { (lv3Name, points) ->
-                    appendLine("## **$lv3Name**")
-                    appendLine()
-                    points.forEach { point ->
-                        append("### ${point.title}")
-                        if (point.grade.isNotEmpty()) append("（${point.grade}）")
-                        appendLine()
-                        appendLine()
-                        if (point.formula.isNotEmpty()) {
-                            append("\$\$${point.formula}\$\$")
-                            appendLine()
-                            appendLine()
-                        }
-                        if (point.content.isNotEmpty()) {
-                            appendLine(point.content)
-                            appendLine()
-                        }
-                        appendLine("---")
-                        appendLine()
-                    }
-                }
-        }.trim()
-    }
     val colors = LocalAppColors.current
     Scaffold(
         containerColor = colors.background,
         topBar = {
             TopAppBar(
                 title = { Text(lv2Name, fontWeight = FontWeight.Bold, maxLines = 1, fontSize = 17.sp) },
-                navigationIcon = { IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, "返回") } },
+                navigationIcon = {
+                    IconButton(onClick = onBack) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "返回")
+                    }
+                },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = colors.background,
                     titleContentColor = colors.text
@@ -291,11 +272,26 @@ private fun Lv2DetailListScreen(
             )
         }
     ) { paddingValues ->
-        Column(Modifier.fillMaxSize().background(colors.background).padding(paddingValues)) {
-            Text("共 ${knowledgeList.size} 个知识点", fontSize = 12.sp,
-                color = colors.text3,
-                modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp))
-            MarkdownWebView(markdown = fullMarkdown, modifier = Modifier.fillMaxSize())
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(colors.background)
+                .padding(paddingValues)
+                .padding(horizontal = 20.dp, vertical = 8.dp),
+            verticalArrangement = Arrangement.spacedBy(6.dp),
+        ) {
+            item {
+                Text(
+                    "共 ${knowledgeList.size} 个知识点",
+                    fontSize = 12.sp,
+                    color = colors.text3,
+                    modifier = Modifier.padding(vertical = 6.dp),
+                )
+            }
+            items(knowledgeList.sortedBy { it.id }, key = { it.id }) { knowledge ->
+                KnowledgeItemCard(knowledge = knowledge, onClick = { onKnowledgeClick(knowledge) })
+            }
+            item { Spacer(Modifier.height(24.dp)) }
         }
     }
 }
@@ -568,8 +564,23 @@ private fun KnowledgeItemCard(knowledge: KnowledgeEntity, onClick: () -> Unit) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun KnowledgeDetailContent(knowledge: KnowledgeEntity, onBack: () -> Unit) {
+private fun KnowledgeDetailContent(
+    knowledge: KnowledgeEntity,
+    onBack: () -> Unit,
+    onStartPractice: (String) -> Unit = {},
+    onOpenKnowledge: (KnowledgeEntity) -> Unit = {},
+) {
     val colors = LocalAppColors.current
+    var examples by remember(knowledge.id) { mutableStateOf<List<ExampleEntity>>(emptyList()) }
+    var prerequisites by remember(knowledge.id) { mutableStateOf<List<KnowledgeEntity>>(emptyList()) }
+    var related by remember(knowledge.id) { mutableStateOf<List<KnowledgeEntity>>(emptyList()) }
+    var models by remember(knowledge.id) { mutableStateOf<List<String>>(emptyList()) }
+    LaunchedEffect(knowledge.id) {
+        examples = KnowledgeRepository.examplesFor(knowledge.id)
+        prerequisites = KnowledgeRepository.prerequisitesOf(knowledge.id)
+        related = KnowledgeRepository.relatedOf(knowledge.id)
+        models = KnowledgeRepository.modelsOf(knowledge.id)
+    }
     Scaffold(
         containerColor = colors.background,
         topBar = {
@@ -631,6 +642,80 @@ private fun KnowledgeDetailContent(knowledge: KnowledgeEntity, onBack: () -> Uni
                     leadingIcon = { Icon(Icons.Default.Category, null, modifier = Modifier.size(16.dp)) })
                 AssistChip(onClick = {}, label = { Text(knowledge.grade.ifEmpty { "通用" }, fontSize = 12.sp) },
                     leadingIcon = { Icon(Icons.Default.School, null, modifier = Modifier.size(16.dp)) })
+                if (knowledge.abilityLevel.isNotEmpty()) {
+                    AssistChip(onClick = {}, label = { Text(knowledge.abilityLevel, fontSize = 12.sp) })
+                }
+            }
+
+            if (models.isNotEmpty()) {
+                Spacer(Modifier.height(14.dp))
+                Text("常考题型", fontWeight = FontWeight.SemiBold, fontSize = 13.sp, color = colors.text)
+                Spacer(Modifier.height(6.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    models.take(6).forEach { m ->
+                        AssistChip(onClick = {}, label = { Text(m, fontSize = 11.5.sp) })
+                    }
+                }
+            }
+
+            if (prerequisites.isNotEmpty()) {
+                Spacer(Modifier.height(14.dp))
+                Text("前置知识", fontWeight = FontWeight.SemiBold, fontSize = 13.sp, color = colors.text)
+                Spacer(Modifier.height(6.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    prerequisites.take(8).forEach { p ->
+                        AssistChip(onClick = { onOpenKnowledge(p) }, label = { Text(p.title, fontSize = 11.5.sp) })
+                    }
+                }
+            }
+
+            if (related.isNotEmpty()) {
+                Spacer(Modifier.height(14.dp))
+                Text("相关知识点", fontWeight = FontWeight.SemiBold, fontSize = 13.sp, color = colors.text)
+                Spacer(Modifier.height(6.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    related.take(8).forEach { r ->
+                        AssistChip(onClick = { onOpenKnowledge(r) }, label = { Text(r.title, fontSize = 11.5.sp) })
+                    }
+                }
+            }
+
+            Spacer(Modifier.height(16.dp))
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(18.dp),
+                colors = CardDefaults.cardColors(containerColor = colors.surface),
+                border = BorderStroke(1.dp, colors.line),
+            ) {
+                Column(modifier = Modifier.padding(14.dp)) {
+                    Text("相关例题", fontWeight = FontWeight.SemiBold, fontSize = 14.sp, color = colors.text)
+                    Spacer(Modifier.height(8.dp))
+                    if (examples.isEmpty()) {
+                        Text("还没有例题，先去练一练吧", fontSize = 12.sp, color = colors.text3)
+                    } else {
+                        examples.take(3).forEach { ex ->
+                            Text(
+                                text = "· " + ex.question.replace(Regex("\\$[^$]*\\$"), "").replace(Regex("[#*`]"), "").take(60),
+                                fontSize = 12.sp, color = colors.text2, lineHeight = 18.sp
+                            )
+                        }
+                    }
+                    Spacer(Modifier.height(10.dp))
+                    Button(
+                        onClick = { onStartPractice(knowledge.id) },
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(14.dp)
+                    ) { Text("练这个知识点", fontSize = 13.sp) }
+                }
             }
         }
     }

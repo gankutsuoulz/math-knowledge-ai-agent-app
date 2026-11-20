@@ -27,6 +27,8 @@ object KnowledgeRepository {
     private var initAttempted = false
 
     private var dao: KnowledgeDao? = null
+    private var graphDao: KnowledgeGraphDao? = null
+    private var exampleDao: ExampleDao? = null
     private val initMutex = Mutex()
 
     /**
@@ -41,6 +43,8 @@ object KnowledgeRepository {
             try {
                 val db = AppDatabase.getInstance(context)
                 dao = db.knowledgeDao()
+                graphDao = db.knowledgeGraphDao()
+                exampleDao = db.exampleDao()
 
                 val count = withContext(Dispatchers.IO) { dao!!.count() }
                 Log.d("KnowledgeRepo", "DB count before import: $count")
@@ -104,6 +108,8 @@ object KnowledgeRepository {
                 _isReady.value = false
                 val db = AppDatabase.getInstance(context)
                 dao = db.knowledgeDao()
+                graphDao = db.knowledgeGraphDao()
+                exampleDao = db.exampleDao()
                 val imported = withContext(Dispatchers.IO) {
                     KnowledgeImporter.importFromAssets(context, dao!!)
                 }
@@ -188,4 +194,68 @@ object KnowledgeRepository {
         Log.e("KnowledgeRepo", "count failed", e)
         0
     }
+    // ============ 图谱 / 串联查询 ============
+
+    suspend fun examplesFor(knowledgeId: String): List<ExampleEntity> = try {
+        withContext(Dispatchers.IO) { exampleDao?.byKnowledgeId(knowledgeId) ?: emptyList() }
+    } catch (e: Exception) {
+        Log.e("KnowledgeRepo", "examplesFor failed", e)
+        emptyList()
+    }
+
+    suspend fun aliasesOf(knowledgeId: String): List<String> = try {
+        withContext(Dispatchers.IO) { graphDao?.aliasesOf(knowledgeId) ?: emptyList() }
+    } catch (e: Exception) {
+        emptyList()
+    }
+
+    suspend fun modelsOf(knowledgeId: String): List<String> = try {
+        withContext(Dispatchers.IO) { graphDao?.modelsOf(knowledgeId)?.map { it.modelName } ?: emptyList() }
+    } catch (e: Exception) {
+        emptyList()
+    }
+
+    suspend fun prerequisitesOf(knowledgeId: String): List<KnowledgeEntity> = try {
+        withContext(Dispatchers.IO) {
+            val ids = graphDao?.edgesTo(knowledgeId)
+                ?.filter { it.type == "PREREQUISITE" }?.map { it.fromId } ?: emptyList()
+            if (ids.isEmpty()) emptyList() else dao?.getByIds(ids) ?: emptyList()
+        }
+    } catch (e: Exception) {
+        emptyList()
+    }
+
+    suspend fun relatedOf(knowledgeId: String): List<KnowledgeEntity> = try {
+        withContext(Dispatchers.IO) {
+            val ids = graphDao?.edgesFrom(knowledgeId)
+                ?.filter { it.type == "RELATED" }?.map { it.toId } ?: emptyList()
+            if (ids.isEmpty()) emptyList() else dao?.getByIds(ids) ?: emptyList()
+        }
+    } catch (e: Exception) {
+        emptyList()
+    }
+
+    /** 把模型/用户输入的知识点文本匹配到知识库 ID（先别名，再标题包含）。 */
+    suspend fun resolveKnowledgeId(text: String): String? = try {
+        withContext(Dispatchers.IO) {
+            val raw = text.trim().removePrefix("$").removeSuffix("$")
+            if (raw.isEmpty()) return@withContext null
+            graphDao?.findByAlias(raw)?.knowledgeId?.let { return@withContext it }
+            // 去掉年级括号再试一次
+            val cleaned = raw.replace(Regex("（[^）]*）|\\([^)]*\\)"), "").trim()
+            graphDao?.findByAlias(cleaned)?.knowledgeId?.let { return@withContext it }
+            dao?.getAll()?.firstOrNull {
+                it.title.replace(Regex("（[^）]*）"), "").trim() == cleaned
+            }?.id
+        }
+    } catch (e: Exception) {
+        null
+    }
+
+    suspend fun getPaths(): List<KnowledgePathEntity> = try {
+        withContext(Dispatchers.IO) { graphDao?.allPaths() ?: emptyList() }
+    } catch (e: Exception) {
+        emptyList()
+    }
+
 }

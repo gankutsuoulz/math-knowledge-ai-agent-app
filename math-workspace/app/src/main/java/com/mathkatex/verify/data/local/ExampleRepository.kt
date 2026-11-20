@@ -71,16 +71,18 @@ object ExampleRepository {
         else practiceDao?.removeFavorite(exampleId)
     }
 
-    suspend fun record(exampleId: String, correct: Boolean, userAnswer: String) = withContext(Dispatchers.IO) {
-        practiceDao?.insertRecord(
-            PracticeRecordEntity(
-                exampleId = exampleId,
-                correct = correct,
-                userAnswer = userAnswer,
-                createdAt = System.currentTimeMillis(),
-            ),
-        )
-    }
+    suspend fun record(exampleId: String, correct: Boolean, userAnswer: String, knowledgeId: String = "") =
+        withContext(Dispatchers.IO) {
+            practiceDao?.insertRecord(
+                PracticeRecordEntity(
+                    exampleId = exampleId,
+                    correct = correct,
+                    userAnswer = userAnswer,
+                    createdAt = System.currentTimeMillis(),
+                    knowledgeId = knowledgeId,
+                ),
+            )
+        }
 
     suspend fun stats(): Pair<Int, Int> = withContext(Dispatchers.IO) {
         val total = practiceDao?.totalCount() ?: 0

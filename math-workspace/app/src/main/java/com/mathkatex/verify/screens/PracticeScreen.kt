@@ -68,7 +68,7 @@ private data class AnswerState(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PracticeScreen(onBack: () -> Unit = {}) {
+fun PracticeScreen(knowledgeId: String = "", onBack: () -> Unit = {}) {
     val colors = LocalAppColors.current
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
@@ -79,7 +79,8 @@ fun PracticeScreen(onBack: () -> Unit = {}) {
 
     LaunchedEffect(Unit) {
         ExampleRepository.init(context)
-        examples = ExampleRepository.getAll()
+        val all = ExampleRepository.getAll()
+        examples = if (knowledgeId.isNotEmpty()) all.filter { it.knowledgeId == knowledgeId } else all
         favorites = ExampleRepository.favoriteIds()
     }
 
@@ -141,7 +142,7 @@ fun PracticeScreen(onBack: () -> Unit = {}) {
                                 val userAnswer = if (example.type == "choice") state.selected else state.fill
                                 val correct = normalizeAnswer(userAnswer) == normalizeAnswer(example.answer)
                                 answers[example.id] = state.copy(submitted = true, correct = correct)
-                                scope.launch { ExampleRepository.record(example.id, correct, userAnswer) }
+                                scope.launch { ExampleRepository.record(example.id, correct, userAnswer, example.knowledgeId) }
                             },
                             onToggleFavorite = {
                                 val next = example.id !in favorites

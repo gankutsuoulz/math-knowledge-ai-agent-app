@@ -29,12 +29,15 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavGraph.Companion.findStartDestination
+import androidx.navigation.NavType
+import androidx.navigation.navArgument
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.mathkatex.verify.data.SettingsManager
+import com.mathkatex.verify.data.local.ExampleRepository
 import com.mathkatex.verify.data.local.KnowledgeRepository
 import com.mathkatex.verify.screens.ErrorGuideScreen
 import com.mathkatex.verify.screens.FavoritesScreen
@@ -63,6 +66,8 @@ class MainActivity : ComponentActivity() {
         LogFileManager.init(applicationContext)
         lifecycleScope.launchWhenStarted {
             KnowledgeRepository.init(applicationContext)
+            // 启动即灌例题，保证知识详情能立刻看到相关例题
+            ExampleRepository.init(applicationContext)
         }
 
         setContent {
@@ -132,7 +137,13 @@ fun MathAppNavigation() {
             modifier = Modifier.padding(paddingValues),
         ) {
             composable(Screen.Home.route) { HomeScreen(navController) }
-            composable(Screen.Knowledge.route) { KnowledgeScreen() }
+            composable(Screen.Knowledge.route) {
+                KnowledgeScreen(
+                    onStartPractice = { id ->
+                        navController.navigate("${Screen.Practice.route}?knowledgeId=$id")
+                    }
+                )
+            }
             composable(Screen.Mine.route) { MineScreen(navController) }
             composable(Screen.PhotoSolve.route) {
                 PhotoSolveScreen(
@@ -164,7 +175,18 @@ fun MathAppNavigation() {
                     androidx.compose.foundation.layout.Box(androidx.compose.ui.Modifier.fillMaxSize())
                 }
             }
-            composable(Screen.Practice.route) { PracticeScreen(onBack = { navController.popBackStack() }) }
+            composable(
+                route = "${Screen.Practice.route}?knowledgeId={knowledgeId}",
+                arguments = listOf(navArgument("knowledgeId") {
+                    type = NavType.StringType
+                    defaultValue = ""
+                })
+            ) { entry ->
+                PracticeScreen(
+                    knowledgeId = entry.arguments?.getString("knowledgeId").orEmpty(),
+                    onBack = { navController.popBackStack() },
+                )
+            }
             composable(Screen.Library.route) { LibraryScreen() }
             composable(Screen.Favorites.route) { FavoritesScreen(onBack = { navController.popBackStack() }) }
             composable(Screen.WrongBook.route) { WrongBookScreen(onBack = { navController.popBackStack() }) }
