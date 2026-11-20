@@ -59,3 +59,9 @@
 
 - 拍照解题结果支持「收藏」：保存题干/结果/图片路径到 photo_solves，我的收藏同时展示拍照题与例题，Mine 收藏数合并统计。
 - MiMo 视觉识题：关闭深度思考（thinking.type=disabled）、强制 response_format=json_object、max_completion_tokens=16384，显著降低思考链烧 token 导致的解析失败；实测 4/4 JSON 成功、9–16s。
+
+
+## v1.4.3（2026-11-20）
+
+- 我的收藏里的拍照题显示原图缩略图，点开全屏放大。
+- 拍照题内容改为解析 structuredJson 后按 Markdown/KaTeX 渲染，不再显示原始 JSON 纯文本。

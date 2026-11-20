@@ -1,6 +1,8 @@
 package com.mathkatex.verify.screens
 
 import androidx.compose.foundation.BorderStroke
+import android.graphics.BitmapFactory
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.clickable
@@ -39,6 +41,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
+import com.google.gson.Gson
+import com.mathkatex.verify.screens.StructuredSolution
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -150,6 +159,7 @@ fun FavoritesScreen(onBack: () -> Unit = {}, onStartPractice: (String) -> Unit =
     var photos by remember { mutableStateOf<List<com.mathkatex.verify.data.local.PhotoSolveRecordEntity>>(emptyList()) }
     var loaded by remember { mutableStateOf(false) }
     var photoDetail by remember { mutableStateOf<com.mathkatex.verify.data.local.PhotoSolveRecordEntity?>(null) }
+    var zoomBitmap by remember { mutableStateOf<android.graphics.Bitmap?>(null) }
 
     LaunchedEffect(Unit) {
         ExampleRepository.init(context)
@@ -216,8 +226,24 @@ fun FavoritesScreen(onBack: () -> Unit = {}, onStartPractice: (String) -> Unit =
                                 )
                             }
                             Spacer(Modifier.height(8.dp))
+                            val photoBitmap = remember(photo.imagePath) {
+                                runCatching { BitmapFactory.decodeFile(photo.imagePath) }.getOrNull()
+                            }
+                            if (photoBitmap != null) {
+                                Image(
+                                    bitmap = photoBitmap.asImageBitmap(),
+                                    contentDescription = "题目原图",
+                                    contentScale = ContentScale.Crop,
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(170.dp)
+                                        .clip(RoundedCornerShape(12.dp))
+                                        .clickable { zoomBitmap = photoBitmap },
+                                )
+                                Spacer(Modifier.height(8.dp))
+                            }
                             MarkdownWebView(
-                                markdown = photo.question.ifBlank { "（无题干）" },
+                                markdown = photoDisplayMarkdown(photo),
                                 modifier = Modifier.fillMaxWidth().heightIn(min = 40.dp, max = 220.dp),
                             )
                         }
@@ -268,7 +294,7 @@ fun FavoritesScreen(onBack: () -> Unit = {}, onStartPractice: (String) -> Unit =
             title = { Text("拍照解题结果", fontSize = 16.sp) },
             text = {
                 MarkdownWebView(
-                    markdown = record.rawResponse,
+                    markdown = photoDisplayMarkdown(record),
                     modifier = Modifier.fillMaxWidth().heightIn(min = 120.dp, max = 420.dp),
                 )
             },
@@ -277,6 +303,55 @@ fun FavoritesScreen(onBack: () -> Unit = {}, onStartPractice: (String) -> Unit =
             },
         )
     }
+
+    zoomBitmap?.let { bmp ->
+        Dialog(
+            onDismissRequest = { zoomBitmap = null },
+            properties = DialogProperties(usePlatformDefaultWidth = false),
+        ) {
+            Surface(
+                modifier = Modifier.fillMaxSize().background(Color.Black),
+                color = Color.Black,
+            ) {
+                Box(Modifier.fillMaxSize().clickable { zoomBitmap = null }, contentAlignment = Alignment.Center) {
+                    Image(
+                        bitmap = bmp.asImageBitmap(),
+                        contentDescription = "原图放大",
+                        contentScale = ContentScale.Fit,
+                        modifier = Modifier.fillMaxSize().padding(12.dp),
+                    )
+                }
+            }
+        }
+    }
+}
+
+/** 把拍照记录的结构化 JSON 还原成可渲染的 Markdown，避免收藏里显示原始 JSON。 */
+private fun photoDisplayMarkdown(record: com.mathkatex.verify.data.local.PhotoSolveRecordEntity): String {
+    val s = try {
+        if (record.structuredJson.isBlank()) null
+        else Gson().fromJson(record.structuredJson, StructuredSolution::class.java)
+    } catch (e: Exception) {
+        null
+    }
+    if (s == null) return record.rawResponse
+    return buildString {
+        s.question?.takeIf { it.isNotBlank() }?.let { append(it).append("\n\n") }
+        if (s.verdict != null) append("**判定**：").append(s.verdict).append("\n\n")
+        if (s.knowledge.isNotEmpty()) append("**知识点**：").append(s.knowledge.joinToString("、")).append("\n\n")
+        s.stuck?.takeIf { it.isNotBlank() }?.let { append("**卡点**：").append(it).append("\n\n") }
+        if (s.hints.isNotEmpty()) {
+            append("**引导问题**\n")
+            s.hints.forEachIndexed { i, h -> append(i + 1).append(". ").append(h).append("\n") }
+            append("\n")
+        }
+        if (s.steps.isNotEmpty()) {
+            append("**完整解析**\n")
+            s.steps.forEachIndexed { i, step -> append(i + 1).append(". ").append(step).append("\n") }
+            append("\n")
+        }
+        s.answer?.takeIf { it.isNotBlank() }?.let { append("**答案**：").append(it) }
+    }.trim()
 }
 
 @Composable
