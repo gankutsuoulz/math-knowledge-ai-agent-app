@@ -28,6 +28,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.mathkatex.verify.data.local.ExampleEntity
+import com.mathkatex.verify.data.local.LearningRepository
+import com.mathkatex.verify.data.local.MasteryEntity
 import com.mathkatex.verify.data.local.KnowledgeEntity
 import com.mathkatex.verify.data.local.KnowledgeRepository
 import com.mathkatex.verify.ui.theme.AppColors
@@ -575,7 +577,9 @@ private fun KnowledgeDetailContent(
     var prerequisites by remember(knowledge.id) { mutableStateOf<List<KnowledgeEntity>>(emptyList()) }
     var related by remember(knowledge.id) { mutableStateOf<List<KnowledgeEntity>>(emptyList()) }
     var models by remember(knowledge.id) { mutableStateOf<List<String>>(emptyList()) }
+    var mastery by remember(knowledge.id) { mutableStateOf<MasteryEntity?>(null) }
     LaunchedEffect(knowledge.id) {
+        mastery = LearningRepository.mastery(knowledge.id)
         examples = KnowledgeRepository.examplesFor(knowledge.id)
         prerequisites = KnowledgeRepository.prerequisitesOf(knowledge.id)
         related = KnowledgeRepository.relatedOf(knowledge.id)
@@ -646,6 +650,23 @@ private fun KnowledgeDetailContent(
                     AssistChip(onClick = {}, label = { Text(knowledge.abilityLevel, fontSize = 12.sp) })
                 }
             }
+
+            Spacer(Modifier.height(14.dp))
+            Text("掌握度", fontWeight = FontWeight.SemiBold, fontSize = 13.sp, color = colors.text)
+            Spacer(Modifier.height(6.dp))
+            val m = mastery
+            LinearProgressIndicator(
+                progress = { m?.score ?: 0f },
+                modifier = Modifier.fillMaxWidth().height(8.dp).clip(RoundedCornerShape(99.dp)),
+                color = colors.primary,
+                trackColor = colors.surface2,
+            )
+            Spacer(Modifier.height(5.dp))
+            Text(
+                if (m == null || m.attempts == 0) "还没练过，点下面「练这个知识点」试试"
+                else "掌握度 ${(m.score * 100).toInt()}% · 已练 ${m.attempts} 次 · 复习阶段 ${m.stage + 1}",
+                fontSize = 11.sp, color = colors.text3,
+            )
 
             if (models.isNotEmpty()) {
                 Spacer(Modifier.height(14.dp))

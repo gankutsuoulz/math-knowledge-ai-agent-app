@@ -252,6 +252,17 @@ object KnowledgeRepository {
         null
     }
 
+    suspend fun pathNodes(pathId: String): List<KnowledgeEntity> = try {
+        withContext(Dispatchers.IO) {
+            val items = graphDao?.pathItems(pathId)?.sortedBy { it.orderIndex } ?: emptyList()
+            if (items.isEmpty()) return@withContext emptyList()
+            val map = dao?.getByIds(items.map { it.knowledgeId })?.associateBy { it.id } ?: emptyMap()
+            items.mapNotNull { map[it.knowledgeId] }
+        }
+    } catch (e: Exception) {
+        emptyList()
+    }
+
     suspend fun getPaths(): List<KnowledgePathEntity> = try {
         withContext(Dispatchers.IO) { graphDao?.allPaths() ?: emptyList() }
     } catch (e: Exception) {

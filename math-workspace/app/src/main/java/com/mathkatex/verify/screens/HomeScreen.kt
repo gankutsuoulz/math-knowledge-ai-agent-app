@@ -98,7 +98,7 @@ fun HomeScreen(navController: NavHostController) {
         item { PhotoSolveCta(colors) { navController.navigate(Screen.PhotoSolve.route) } }
         item { QuickGrid(colors, navController) }
         item { ReviewHomeCard(colors) { navController.navigate(Screen.Review.route) } }
-        item { ContinueCard(colors) { navController.navigate(Screen.Knowledge.route) } }
+        item { ContinueCard(colors) { navController.navigate(Screen.Paths.route) } }
         item { DailyStrip(colors) }
     }
 }

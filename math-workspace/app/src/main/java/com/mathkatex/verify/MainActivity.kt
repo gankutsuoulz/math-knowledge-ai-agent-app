@@ -50,6 +50,7 @@ import com.mathkatex.verify.screens.LibraryScreen
 import com.mathkatex.verify.screens.MineScreen
 import com.mathkatex.verify.screens.PhotoSolveScreen
 import com.mathkatex.verify.screens.RegionSelectScreen
+import com.mathkatex.verify.screens.PathsScreen
 import com.mathkatex.verify.screens.ReviewScreen
 import com.mathkatex.verify.screens.PracticeScreen
 import com.mathkatex.verify.screens.SearchScreen
@@ -101,6 +102,7 @@ sealed class Screen(val route: String, val title: String) {
     object FormulaConvert : Screen("formula_convert", "拍照转公式")
     object Mine : Screen("mine", "我的")
     object Review : Screen("review", "今日复习")
+    object Paths : Screen("paths", "专题路径")
     object Settings : Screen("settings", "设置")
 }
 
