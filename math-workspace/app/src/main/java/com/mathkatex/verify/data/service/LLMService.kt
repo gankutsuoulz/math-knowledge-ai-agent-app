@@ -140,8 +140,15 @@ class LLMService {
             val jsonBody = JsonObject().apply {
                 addProperty("model", cfg.visionModelName)
                 add("messages", com.google.gson.JsonParser.parseString(messagesJson).asJsonArray)
-                addProperty("temperature", 0.5)
-                addProperty("max_tokens", maxOutputTokens(cfg.provider))
+                if (cfg.provider == Provider.XIAOMI) {
+                    // 拍照识题只要结构化结果：关闭深度思考，强制 JSON 输出，减少思考链挤占输出与解析失败
+                    addProperty("max_completion_tokens", 16384)
+                    add("thinking", JsonObject().apply { addProperty("type", "disabled") })
+                    add("response_format", JsonObject().apply { addProperty("type", "json_object") })
+                } else {
+                    addProperty("temperature", 0.5)
+                    addProperty("max_tokens", maxOutputTokens(cfg.provider))
+                }
             }.toString()
 
             LogFileManager.logRequest("LLMService", "provider=${cfg.provider} model=${cfg.visionModelName} url=${getApiUrl()} json=${jsonBody.substring(0, minOf(jsonBody.length, 500))}")

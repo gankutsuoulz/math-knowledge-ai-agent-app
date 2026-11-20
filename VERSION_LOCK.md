@@ -53,3 +53,9 @@
 - 修复深色模式下 Markdown/KaTeX 结果页黑底黑字：WebView 跟随 App 主题色渲染。
 - MainActivity 声明 `configChanges="uiMode"`，系统深浅色切换不再重建 Activity，拍照结果与已选图片不丢。
 - 真机验证：识别结果页切深色仍可读，来回切主题结果保留。
+
+
+## v1.4.2（2026-11-20）
+
+- 拍照解题结果支持「收藏」：保存题干/结果/图片路径到 photo_solves，我的收藏同时展示拍照题与例题，Mine 收藏数合并统计。
+- MiMo 视觉识题：关闭深度思考（thinking.type=disabled）、强制 response_format=json_object、max_completion_tokens=16384，显著降低思考链烧 token 导致的解析失败；实测 4/4 JSON 成功、9–16s。

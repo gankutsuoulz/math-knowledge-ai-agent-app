@@ -20,8 +20,9 @@ import androidx.sqlite.db.SupportSQLiteDatabase
         KnowledgeModelEntity::class,
         MasteryEntity::class,
         ReviewItemEntity::class,
+        PhotoSolveRecordEntity::class,
     ],
-    version = 5,
+    version = 6,
     exportSchema = false,
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -30,6 +31,7 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun practiceDao(): PracticeDao
     abstract fun knowledgeGraphDao(): KnowledgeGraphDao
     abstract fun masteryDao(): MasteryDao
+    abstract fun photoSolveDao(): PhotoSolveDao
 
     companion object {
         @Volatile
@@ -136,6 +138,19 @@ abstract class AppDatabase : RoomDatabase() {
             }
         }
 
+        /** v5 -> v6：拍照解题收藏记录。 */
+        private val MIGRATION_5_6 = object : Migration(5, 6) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    "CREATE TABLE IF NOT EXISTS `photo_solves` (" +
+                        "`id` TEXT NOT NULL, `question` TEXT NOT NULL, `rawResponse` TEXT NOT NULL, " +
+                        "`structuredJson` TEXT NOT NULL, `knowledgeIds` TEXT NOT NULL, " +
+                        "`imagePath` TEXT NOT NULL, `favorite` INTEGER NOT NULL, " +
+                        "`createdAt` INTEGER NOT NULL, PRIMARY KEY(`id`))",
+                )
+            }
+        }
+
         fun getInstance(context: Context): AppDatabase {
             return INSTANCE ?: synchronized(this) {
                 val instance = Room.databaseBuilder(
@@ -143,7 +158,7 @@ abstract class AppDatabase : RoomDatabase() {
                     AppDatabase::class.java,
                     "math_app.db",
                 )
-                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5)
+                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6)
                     .fallbackToDestructiveMigration()
                     .build()
                 INSTANCE = instance

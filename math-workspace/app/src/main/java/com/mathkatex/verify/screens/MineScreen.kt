@@ -48,6 +48,7 @@ import androidx.navigation.NavHostController
 import com.mathkatex.verify.R
 import com.mathkatex.verify.Screen
 import com.mathkatex.verify.data.local.ExampleRepository
+import com.mathkatex.verify.data.local.PhotoSolveRepository
 import com.mathkatex.verify.ui.theme.AppColors
 import com.mathkatex.verify.ui.theme.LocalAppColors
 
@@ -63,10 +64,11 @@ fun MineScreen(navController: NavHostController) {
     var wrongCount by remember { mutableStateOf(0) }
     LaunchedEffect(Unit) {
         ExampleRepository.init(context)
+        PhotoSolveRepository.init(context)
         val (total, right) = ExampleRepository.stats()
         practiced = total
         correct = right
-        favoritesCount = ExampleRepository.favoriteIds().size
+        favoritesCount = ExampleRepository.favoriteIds().size + PhotoSolveRepository.favoriteCount()
         wrongCount = ExampleRepository.wrongExamples().size
     }
     Column(

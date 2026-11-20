@@ -8,6 +8,7 @@ import android.graphics.Matrix
 import android.media.ExifInterface
 import android.net.Uri
 import android.util.Base64
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
@@ -47,6 +48,8 @@ import com.mathkatex.verify.screens.MarkdownWebView
 import com.mathkatex.verify.data.SettingsManager
 import com.mathkatex.verify.data.local.KnowledgeEntity
 import com.mathkatex.verify.data.local.KnowledgeRepository
+import com.mathkatex.verify.data.local.PhotoSolveRecordEntity
+import com.mathkatex.verify.data.local.PhotoSolveRepository
 import com.mathkatex.verify.data.service.LLMService
 import com.google.gson.Gson
 import com.mathkatex.verify.ui.theme.LocalAppColors
@@ -110,6 +113,8 @@ fun PhotoSolveScreen(
     var errorMessage by remember { mutableStateOf<String?>(null) }
     var showFullSolution by remember { mutableStateOf(false) }
     var knowledgeDialog by remember { mutableStateOf<KnowledgeEntity?>(null) }
+    var photoRecordId by remember { mutableStateOf<String?>(null) }
+    var photoFavorited by remember { mutableStateOf(false) }
     var selectedBitmap by remember { mutableStateOf<Bitmap?>(null) }
     var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
     var hasCameraPermission by remember {
@@ -124,6 +129,7 @@ fun PhotoSolveScreen(
     // Initialize LLM service with saved settings
     LaunchedEffect(Unit) {
         llmService.refreshConfigFromSettings()
+        PhotoSolveRepository.init(context)
     }
 
     // 高清相机启动器 - 使用 FileProvider 创建临时文件
@@ -443,9 +449,12 @@ fun PhotoSolveScreen(
                             apiResult.fold(
                                 onSuccess = { response ->
                                     LogFileManager.logResponse("PhotoSolve", response)
+                                    val parsed = parseStructuredSolution(response)
+                                    photoRecordId = "PHOTO_" + System.currentTimeMillis()
+                                    photoFavorited = false
                                     result = SolveResult(
                                         rawResponse = response,
-                                        structured = parseStructuredSolution(response)
+                                        structured = parsed
                                     )
                                     currentStep = PhotoSolveStep.Completed
                                 },
@@ -701,7 +710,44 @@ fun PhotoSolveScreen(
                                     }
 
                                     Button(
-                                        onClick = { /* TODO: 收藏功能，后续实现 */ },
+                                        onClick = {
+                                            val current = result ?: return@Button
+                                            val id = photoRecordId ?: ("PHOTO_" + System.currentTimeMillis()).also { photoRecordId = it }
+                                            scope.launch {
+                                                val imagePath = withContext(Dispatchers.IO) {
+                                                    try {
+                                                        val dir = File(context.filesDir, "photo_solves").apply { mkdirs() }
+                                                        val f = File(dir, "$id.jpg")
+                                                        selectedBitmap?.compress(Bitmap.CompressFormat.JPEG, 85, f.outputStream())
+                                                        f.absolutePath
+                                                    } catch (e: Exception) {
+                                                        LogFileManager.logError("PhotoSolve", "save photo failed: ${e.message}", e)
+                                                        ""
+                                                    }
+                                                }
+                                                val structured = current.structured
+                                                val knowledgeIds = withContext(Dispatchers.IO) {
+                                                    structured?.knowledge.orEmpty().mapNotNull {
+                                                        KnowledgeRepository.resolveKnowledgeId(it)
+                                                    }.distinct().joinToString(",")
+                                                }
+                                                PhotoSolveRepository.save(
+                                                    PhotoSolveRecordEntity(
+                                                        id = id,
+                                                        question = structured?.question ?: current.rawResponse.take(1500),
+                                                        rawResponse = current.rawResponse,
+                                                        structuredJson = structured?.let { Gson().toJson(it) } ?: "",
+                                                        knowledgeIds = knowledgeIds,
+                                                        imagePath = imagePath,
+                                                        favorite = true,
+                                                        createdAt = System.currentTimeMillis(),
+                                                    )
+                                                )
+                                                photoFavorited = true
+                                                Toast.makeText(context, "已收藏到我的收藏", Toast.LENGTH_SHORT).show()
+                                            }
+                                        },
+                                        enabled = !photoFavorited,
                                         modifier = Modifier.weight(1f),
                                         shape = RoundedCornerShape(14.dp),
                                         colors = ButtonDefaults.buttonColors(
@@ -714,7 +760,7 @@ fun PhotoSolveScreen(
                                             modifier = Modifier.size(18.dp)
                                         )
                                         Spacer(modifier = Modifier.width(6.dp))
-                                        Text("收藏")
+                                        Text(if (photoFavorited) "已收藏" else "收藏")
                                     }
                                 }
                             }
