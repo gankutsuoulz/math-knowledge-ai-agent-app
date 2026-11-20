@@ -1,0 +1,30 @@
+[
+  {
+    "model": "Qwen/Qwen3-VL-32B-Instruct",
+    "error": "HTTPSConnectionPool(host='api.siliconflow.cn', port=443): Read timed out. (read timeout=180)",
+    "elapsed": 180.3
+  },
+  {
+    "model": "Qwen/Qwen3-VL-8B-Instruct",
+    "error": "HTTPSConnectionPool(host='api.siliconflow.cn', port=443): Read timed out. (read timeout=180)",
+    "elapsed": 180.6
+  },
+  {
+    "model": "mimo-v2.6-flash",
+    "elapsed": 84.6,
+    "status": 200,
+    "content": "",
+    "usage": {
+      "completion_tokens": 3000,
+      "prompt_tokens": 726,
+      "total_tokens": 3726,
+      "completion_tokens_details": {
+        "reasoning_tokens": 2999
+      },
+      "prompt_tokens_details": {
+        "cached_tokens": 0,
+        "image_tokens": 620
+      }
+    }
+  }
+]
