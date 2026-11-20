@@ -166,10 +166,10 @@ fun SettingsScreen() {
                         value = xiaomiModel,
                         onValueChange = { xiaomiModel = it },
                         label = { Text("模型名称") },
-                        placeholder = { Text("mimo-v2.5-pro") },
+                        placeholder = { Text("mimo-v2.6-pro") },
                         modifier = Modifier.fillMaxWidth(),
                         singleLine = true,
-                        supportingText = { Text("例如：mimo-v2.5-pro、mimo-v2.5") }
+                        supportingText = { Text("例如：mimo-v2.6-pro、mimo-v2.6-flash") }
                     )
 
                     OutlinedTextField(

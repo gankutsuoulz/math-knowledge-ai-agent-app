@@ -29,6 +29,12 @@ class LLMService {
     /**
      * 配置快照，一次性读取保证原子性
      */
+    companion object {
+        /** MiMo v2.6 系列最大输出 131072 tokens；DeepSeek 文本模型上限 8192。 */
+        private const val MAX_TOKENS_XIAOMI = 131072
+        private const val MAX_TOKENS_DEEPSEEK = 8192
+    }
+
     data class ConfigSnapshot(
         val apiKey: String,
         val modelName: String,
@@ -87,6 +93,9 @@ class LLMService {
     /**
      * 获取当前有效的 API 端点 URL（确保末尾不带斜杠）
      */
+    private fun maxOutputTokens(provider: Provider): Int =
+        if (provider == Provider.XIAOMI) MAX_TOKENS_XIAOMI else MAX_TOKENS_DEEPSEEK
+
     private fun getApiUrl(): String {
         return snapshot().baseUrl.trimEnd('/')
     }
@@ -132,7 +141,7 @@ class LLMService {
                 addProperty("model", cfg.visionModelName)
                 add("messages", com.google.gson.JsonParser.parseString(messagesJson).asJsonArray)
                 addProperty("temperature", 0.5)
-                addProperty("max_tokens", 4096)
+                addProperty("max_tokens", maxOutputTokens(cfg.provider))
             }.toString()
 
             LogFileManager.logRequest("LLMService", "provider=${cfg.provider} model=${cfg.visionModelName} url=${getApiUrl()} json=${jsonBody.substring(0, minOf(jsonBody.length, 500))}")
@@ -173,7 +182,7 @@ class LLMService {
                 addProperty("model", cfg.modelName)
                 add("messages", messagesArray)
                 addProperty("temperature", 0.5)
-                addProperty("max_tokens", 4096)
+                addProperty("max_tokens", maxOutputTokens(cfg.provider))
             }.toString()
 
             val response = sendRequest(jsonBody)

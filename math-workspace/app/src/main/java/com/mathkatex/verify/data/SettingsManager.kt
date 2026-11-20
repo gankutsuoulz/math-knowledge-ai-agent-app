@@ -30,8 +30,8 @@ object SettingsManager {
     private const val KEY_PHOTO_PROMPT_ENABLED = "photo_prompt_enabled"
 
     // 默认值
-    private const val DEFAULT_XIAOMI_MODEL = "mimo-v2.5-pro"
-    private const val DEFAULT_XIAOMI_VISION_MODEL = "mimo-v2.5"
+    private const val DEFAULT_XIAOMI_MODEL = "mimo-v2.6-pro"
+    private const val DEFAULT_XIAOMI_VISION_MODEL = "mimo-v2.6-pro"
     private const val DEFAULT_XIAOMI_BASE_URL = "https://api.xiaomimimo.com/v1"
     private const val DEFAULT_DEEPSEEK_MODEL = "deepseek-chat"
     private const val DEFAULT_DEEPSEEK_BASE_URL = "https://api.deepseek.com"
@@ -63,12 +63,20 @@ object SettingsManager {
         set(value) = prefs.edit().putString(KEY_XIAOMI_API_KEY, value).apply()
 
     var xiaomiModel: String
-        get() = prefs.getString(KEY_XIAOMI_MODEL, DEFAULT_XIAOMI_MODEL) ?: DEFAULT_XIAOMI_MODEL
+        get() = upgradeDeprecatedModel(
+            prefs.getString(KEY_XIAOMI_MODEL, DEFAULT_XIAOMI_MODEL) ?: DEFAULT_XIAOMI_MODEL
+        )
         set(value) = prefs.edit().putString(KEY_XIAOMI_MODEL, value).apply()
 
     var xiaomiVisionModel: String
-        get() = prefs.getString(KEY_XIAOMI_VISION_MODEL, DEFAULT_XIAOMI_VISION_MODEL) ?: DEFAULT_XIAOMI_VISION_MODEL
+        get() = upgradeDeprecatedModel(
+            prefs.getString(KEY_XIAOMI_VISION_MODEL, DEFAULT_XIAOMI_VISION_MODEL) ?: DEFAULT_XIAOMI_VISION_MODEL
+        )
         set(value) = prefs.edit().putString(KEY_XIAOMI_VISION_MODEL, value).apply()
+
+    /** mimo-v2.5 系列已于 2026-10-21 下线，读到旧配置自动升级到 v2.6-pro。 */
+    private fun upgradeDeprecatedModel(name: String): String =
+        if (name.startsWith("mimo-v2.5")) DEFAULT_XIAOMI_VISION_MODEL else name
 
     var xiaomiBaseUrl: String
         get() = prefs.getString(KEY_XIAOMI_BASE_URL, DEFAULT_XIAOMI_BASE_URL) ?: DEFAULT_XIAOMI_BASE_URL
