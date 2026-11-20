@@ -21,4 +21,7 @@ interface PhotoSolveDao {
 
     @Query("SELECT * FROM photo_solves WHERE id = :id")
     suspend fun get(id: String): PhotoSolveRecordEntity?
+
+    @Query("DELETE FROM photo_solves WHERE id = :id")
+    suspend fun delete(id: String)
 }

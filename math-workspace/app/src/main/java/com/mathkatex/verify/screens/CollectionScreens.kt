@@ -16,12 +16,15 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Delete
+import android.widget.Toast
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -38,6 +41,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.launch
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -158,6 +163,7 @@ fun FavoritesScreen(onBack: () -> Unit = {}, onStartPractice: (String) -> Unit =
     var examples by remember { mutableStateOf<List<ExampleEntity>>(emptyList()) }
     var photos by remember { mutableStateOf<List<com.mathkatex.verify.data.local.PhotoSolveRecordEntity>>(emptyList()) }
     var loaded by remember { mutableStateOf(false) }
+    val scope = rememberCoroutineScope()
     var photoDetail by remember { mutableStateOf<com.mathkatex.verify.data.local.PhotoSolveRecordEntity?>(null) }
     var zoomBitmap by remember { mutableStateOf<android.graphics.Bitmap?>(null) }
 
@@ -224,6 +230,15 @@ fun FavoritesScreen(onBack: () -> Unit = {}, onStartPractice: (String) -> Unit =
                                     SimpleDateFormat("MM-dd HH:mm", Locale.CHINA).format(Date(photo.createdAt)),
                                     fontSize = 11.sp, color = colors.text3,
                                 )
+                                IconButton(onClick = {
+                                    scope.launch {
+                                        com.mathkatex.verify.data.local.PhotoSolveRepository.remove(photo.id)
+                                        photos = photos.filterNot { it.id == photo.id }
+                                        Toast.makeText(context, "已删除收藏", Toast.LENGTH_SHORT).show()
+                                    }
+                                }) {
+                                    Icon(Icons.Default.Delete, contentDescription = "删除收藏", tint = colors.text3, modifier = Modifier.size(18.dp))
+                                }
                             }
                             Spacer(Modifier.height(8.dp))
                             val photoBitmap = remember(photo.imagePath) {
@@ -244,8 +259,12 @@ fun FavoritesScreen(onBack: () -> Unit = {}, onStartPractice: (String) -> Unit =
                             }
                             MarkdownWebView(
                                 markdown = photoDisplayMarkdown(photo),
-                                modifier = Modifier.fillMaxWidth().heightIn(min = 40.dp, max = 220.dp),
+                                modifier = Modifier.fillMaxWidth().heightIn(min = 60.dp, max = 320.dp),
                             )
+                            Spacer(Modifier.height(4.dp))
+                            TextButton(onClick = { photoDetail = photo }, modifier = Modifier.fillMaxWidth()) {
+                                Text("查看完整解析", fontSize = 12.sp)
+                            }
                         }
                     }
                 }
@@ -273,6 +292,14 @@ fun FavoritesScreen(onBack: () -> Unit = {}, onStartPractice: (String) -> Unit =
                                 )
                                 Spacer(Modifier.weight(1f))
                                 Text(example.grade, fontSize = 11.sp, color = colors.text3)
+                                IconButton(onClick = {
+                                    scope.launch {
+                                        ExampleRepository.toggleFavorite(example.id, false)
+                                        examples = examples.filterNot { it.id == example.id }
+                                    }
+                                }) {
+                                    Icon(Icons.Default.Delete, contentDescription = "删除收藏", tint = colors.text3, modifier = Modifier.size(18.dp))
+                                }
                             }
                             Spacer(Modifier.height(8.dp))
                             MarkdownWebView(
@@ -329,8 +356,10 @@ fun FavoritesScreen(onBack: () -> Unit = {}, onStartPractice: (String) -> Unit =
 /** 把拍照记录的结构化 JSON 还原成可渲染的 Markdown，避免收藏里显示原始 JSON。 */
 private fun photoDisplayMarkdown(record: com.mathkatex.verify.data.local.PhotoSolveRecordEntity): String {
     val s = try {
-        if (record.structuredJson.isBlank()) null
-        else Gson().fromJson(record.structuredJson, StructuredSolution::class.java)
+        val json = record.structuredJson.takeIf { it.isNotBlank() } ?: record.rawResponse
+        val start = json.indexOf('{'); val end = json.lastIndexOf('}')
+        if (start < 0 || end <= start) null
+        else Gson().fromJson(json.substring(start, end + 1), StructuredSolution::class.java)
     } catch (e: Exception) {
         null
     }

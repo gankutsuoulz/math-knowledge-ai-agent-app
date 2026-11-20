@@ -31,4 +31,8 @@ object PhotoSolveRepository {
     suspend fun get(id: String): PhotoSolveRecordEntity? = withContext(Dispatchers.IO) {
         dao?.get(id)
     }
+
+    suspend fun remove(id: String) = withContext(Dispatchers.IO) {
+        dao?.delete(id)
+    }
 }
