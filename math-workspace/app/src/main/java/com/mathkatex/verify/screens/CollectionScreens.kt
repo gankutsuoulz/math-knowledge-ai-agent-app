@@ -316,19 +316,30 @@ fun FavoritesScreen(onBack: () -> Unit = {}, onStartPractice: (String) -> Unit =
     }
 
     photoDetail?.let { record ->
-        AlertDialog(
+        Dialog(
             onDismissRequest = { photoDetail = null },
-            title = { Text("拍照解题结果", fontSize = 16.sp) },
-            text = {
-                MarkdownWebView(
-                    markdown = photoDisplayMarkdown(record),
-                    modifier = Modifier.fillMaxWidth().heightIn(min = 120.dp, max = 420.dp),
-                )
-            },
-            confirmButton = {
-                TextButton(onClick = { photoDetail = null }) { Text("关闭") }
-            },
-        )
+            properties = DialogProperties(usePlatformDefaultWidth = false),
+        ) {
+            Surface(
+                modifier = Modifier.fillMaxWidth(0.93f),
+                shape = RoundedCornerShape(22.dp),
+                color = colors.surface,
+            ) {
+                Column(Modifier.padding(16.dp)) {
+                    Text("拍照解题结果", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = colors.text)
+                    Spacer(Modifier.height(10.dp))
+                    MarkdownWebView(
+                        markdown = photoDisplayMarkdown(record),
+                        modifier = Modifier.fillMaxWidth().height(480.dp),
+                        interactive = true,
+                    )
+                    Spacer(Modifier.height(8.dp))
+                    TextButton(onClick = { photoDetail = null }, modifier = Modifier.align(Alignment.End)) {
+                        Text("关闭")
+                    }
+                }
+            }
+        }
     }
 
     zoomBitmap?.let { bmp ->

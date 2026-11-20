@@ -416,11 +416,12 @@ private fun buildRenderScript(): String {
 fun MarkdownWebView(
     markdown: String,
     modifier: Modifier = Modifier,
-    minHeight: Int = 100
+    minHeight: Int = 100,
+    interactive: Boolean = false
 ) {
     val colors = LocalAppColors.current
     val dark = colors.background.luminance() < 0.5f
-    val html = remember(markdown, dark) { buildFullHtml(markdown, dark) }
+    val html = remember(markdown, dark, interactive) { buildFullHtml(markdown, dark) }
 
     AndroidView(
         factory = { context ->
@@ -445,11 +446,15 @@ fun MarkdownWebView(
                 webViewClient = WebViewClient()
                 isHorizontalScrollBarEnabled = false
                 isVerticalScrollBarEnabled = false
-                // 作为纯展示组件使用：不消费触摸事件，把滚动/点击交给外层 Compose，避免结果页滑不动
-                isEnabled = false
-                isFocusable = false
-                isClickable = false
-                isLongClickable = false
+                if (!interactive) {
+                    // 作为纯展示组件使用：不消费触摸事件，把滚动/点击交给外层 Compose，避免结果页滑不动
+                    isEnabled = false
+                    isFocusable = false
+                    isClickable = false
+                    isLongClickable = false
+                } else {
+                    isVerticalScrollBarEnabled = true
+                }
                 loadDataWithBaseURL(KATEX_BASE, html, "text/html", "UTF-8", null)
             }
         },
