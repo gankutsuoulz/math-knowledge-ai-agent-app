@@ -71,6 +71,9 @@ data class SolveResult(
 @Composable
 fun PhotoSolveScreen(
     onNavigateToImageEdit: ((Bitmap) -> Unit)? = null,
+    onNavigateToRegionSelect: ((Bitmap) -> Unit)? = null,
+    regionResult: Bitmap? = null,
+    onRegionConsumed: () -> Unit = {},
     onBack: () -> Unit = {},
 ) {
     val context = LocalContext.current
@@ -159,13 +162,16 @@ fun PhotoSolveScreen(
         }
     }
 
-    // 页面销毁时回收 Bitmap 防止内存泄漏
-    DisposableEffect(Unit) {
-        onDispose {
-            selectedBitmap?.recycle()
+    // 圈选结果回填：替换当前待识别图片
+    LaunchedEffect(regionResult) {
+        if (regionResult != null) {
+            selectedBitmap = regionResult
+            currentStep = PhotoSolveStep.ImageSelected
+            onRegionConsumed()
         }
     }
 
+    // 不在离开页面时 recycle：位图可能被圈选页继续使用，交给 GC 回收
     val colors = LocalAppColors.current
     Scaffold(
         containerColor = colors.background,
@@ -300,9 +306,9 @@ fun PhotoSolveScreen(
                 ) {
                     OutlinedButton(
                         onClick = {
-                            onNavigateToImageEdit?.invoke(selectedBitmap!!)
+                            onNavigateToRegionSelect?.invoke(selectedBitmap!!)
                         },
-                        modifier = Modifier.weight(1f),
+                        modifier = Modifier.weight(1.3f),
                         shape = RoundedCornerShape(12.dp),
                         colors = ButtonDefaults.outlinedButtonColors(
                             contentColor = MaterialTheme.colorScheme.primary
@@ -313,8 +319,20 @@ fun PhotoSolveScreen(
                             contentDescription = null,
                             modifier = Modifier.size(20.dp)
                         )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text("裁剪/旋转")
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text("圈选区域", fontSize = 13.sp)
+                    }
+                    OutlinedButton(
+                        onClick = {
+                            onNavigateToImageEdit?.invoke(selectedBitmap!!)
+                        },
+                        modifier = Modifier.weight(1f),
+                        shape = RoundedCornerShape(12.dp),
+                        colors = ButtonDefaults.outlinedButtonColors(
+                            contentColor = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    ) {
+                        Text("裁剪/旋转", fontSize = 13.sp)
                     }
                 }
 
@@ -340,7 +358,7 @@ fun PhotoSolveScreen(
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
                         text = if (currentStep == PhotoSolveStep.ImageSelected)
-                            "提示：可点击「裁剪/旋转」按钮调整图片，截取需要的题目区域"
+                            "提示：可点「圈选区域」只保留题目部分，空白多或不规则排版都能圈"
                         else
                             "提示：请确保图片中题目清晰可见，避免反光和阴影",
                         fontSize = 12.sp,

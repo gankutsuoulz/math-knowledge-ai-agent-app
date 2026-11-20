@@ -21,6 +21,9 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
@@ -42,6 +45,7 @@ import com.mathkatex.verify.screens.KnowledgeScreen
 import com.mathkatex.verify.screens.LibraryScreen
 import com.mathkatex.verify.screens.MineScreen
 import com.mathkatex.verify.screens.PhotoSolveScreen
+import com.mathkatex.verify.screens.RegionSelectScreen
 import com.mathkatex.verify.screens.PracticeScreen
 import com.mathkatex.verify.screens.SearchScreen
 import com.mathkatex.verify.screens.SettingsScreen
@@ -78,6 +82,7 @@ sealed class Screen(val route: String, val title: String) {
     object Home : Screen("home", "首页")
     object PhotoSolve : Screen("photo_solve", "拍照解题")
     object ImageEdit : Screen("image_edit", "图片编辑")
+    object RegionSelect : Screen("region_select", "圈选题目区域")
     object Knowledge : Screen("knowledge", "知识点速查")
     object Practice : Screen("practice", "例题练习")
     object Library : Screen("library", "例题库管理")
@@ -105,6 +110,9 @@ private var pendingEditResult: Bitmap? = null
 @Composable
 fun MathAppNavigation() {
     val navController = rememberNavController()
+    // 圈选：来源图 / 回填结果
+    var regionSourceBitmap by remember { mutableStateOf<Bitmap?>(null) }
+    var regionResultBitmap by remember { mutableStateOf<Bitmap?>(null) }
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route ?: Screen.Home.route
     val showTabs = tabs.any { it.route == currentRoute }
@@ -133,6 +141,12 @@ fun MathAppNavigation() {
                         imageEditSourceBitmap = bitmap
                         navController.navigate(Screen.ImageEdit.route)
                     },
+                    onNavigateToRegionSelect = { bitmap ->
+                        regionSourceBitmap = bitmap
+                        navController.navigate(Screen.RegionSelect.route)
+                    },
+                    regionResult = regionResultBitmap,
+                    onRegionConsumed = { regionResultBitmap = null },
                     onBack = { navController.popBackStack() },
                 )
             }
@@ -152,9 +166,27 @@ fun MathAppNavigation() {
                         },
                     )
                 } else {
-                    androidx.compose.runtime.LaunchedEffect(Unit) {
-                        navController.popBackStack()
-                    }
+                    // 来源位图已被消费（如确认后置空）：保持空白，避免二次 pop 掉上一页
+                    androidx.compose.foundation.layout.Box(androidx.compose.ui.Modifier.fillMaxSize())
+                }
+            }
+            composable(Screen.RegionSelect.route) {
+                val src = regionSourceBitmap
+                if (src != null) {
+                    RegionSelectScreen(
+                        originalBitmap = src,
+                        onConfirm = { result ->
+                            regionResultBitmap = result
+                            regionSourceBitmap = null
+                            navController.popBackStack()
+                        },
+                        onCancel = {
+                            regionSourceBitmap = null
+                            navController.popBackStack()
+                        }
+                    )
+                } else {
+                    androidx.compose.foundation.layout.Box(androidx.compose.ui.Modifier.fillMaxSize())
                 }
             }
             composable(Screen.Practice.route) { PracticeScreen(onBack = { navController.popBackStack() }) }
