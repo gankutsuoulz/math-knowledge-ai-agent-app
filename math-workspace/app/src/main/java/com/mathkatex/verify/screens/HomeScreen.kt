@@ -97,7 +97,14 @@ fun HomeScreen(navController: NavHostController) {
         item { HomeHeader(colors, hello) }
         item { PhotoSolveCta(colors) { navController.navigate(Screen.PhotoSolve.route) } }
         item { QuickGrid(colors, navController) }
-        item { ReviewHomeCard(colors) { navController.navigate(Screen.Review.route) } }
+        item {
+            TodayStepsCard(
+                colors = colors,
+                onReview = { navController.navigate(Screen.Review.route) },
+                onPractice = { navController.navigate(Screen.Practice.route) },
+                onPaths = { navController.navigate(Screen.Paths.route) },
+            )
+        }
         item { ContinueCard(colors) { navController.navigate(Screen.Paths.route) } }
         item { DailyStrip(colors) }
     }
@@ -362,5 +369,65 @@ private fun ReviewHomeCard(colors: AppColors, onClick: () -> Unit) {
             }
             Icon(Icons.Default.ChevronRight, contentDescription = null, tint = colors.text3)
         }
+    }
+}
+
+
+@Composable
+private fun TodayStepsCard(
+    colors: AppColors,
+    onReview: () -> Unit,
+    onPractice: () -> Unit,
+    onPaths: () -> Unit,
+) {
+    val context = LocalContext.current
+    var due by remember { mutableStateOf(0) }
+    LaunchedEffect(Unit) {
+        LearningRepository.init(context)
+        due = LearningRepository.dueCount()
+    }
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.cardColors(containerColor = colors.surface),
+        border = BorderStroke(1.dp, colors.line),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+    ) {
+        Column(Modifier.padding(15.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Box(
+                    modifier = Modifier.size(34.dp).clip(RoundedCornerShape(11.dp)).background(colors.primarySoft),
+                    contentAlignment = Alignment.Center,
+                ) { Text("今", fontSize = 14.sp, color = colors.primary, fontWeight = FontWeight.Bold) }
+                Spacer(Modifier.width(10.dp))
+                Column(Modifier.weight(1f)) {
+                    Text("今日三步", fontSize = 14.sp, fontWeight = FontWeight.SemiBold, color = colors.text)
+                    Text(
+                        if (due > 0) "先复习 $due 个到期知识点，再练新题" else "复习 · 练习 · 看路径，照着走就行",
+                        fontSize = 11.sp, color = colors.text3,
+                    )
+                }
+            }
+            Spacer(Modifier.height(10.dp))
+            TodayStepRow("1", if (due > 0) "复习 $due 个到期知识点" else "今天没有到期复习", colors, onReview)
+            TodayStepRow("2", "练 3 道题，巩固手感", colors, onPractice)
+            TodayStepRow("3", "看一条专题路径，知道下一步学什么", colors, onPaths)
+        }
+    }
+}
+
+@Composable
+private fun TodayStepRow(no: String, text: String, colors: AppColors, onClick: () -> Unit) {
+    Row(
+        modifier = Modifier.fillMaxWidth().clickable { onClick() }.padding(vertical = 7.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Box(
+            modifier = Modifier.size(20.dp).clip(RoundedCornerShape(99.dp)).background(colors.primarySoft),
+            contentAlignment = Alignment.Center,
+        ) { Text(no, fontSize = 10.5.sp, color = colors.primary, fontWeight = FontWeight.Bold) }
+        Spacer(Modifier.width(9.dp))
+        Text(text, fontSize = 12.sp, color = colors.text2, modifier = Modifier.weight(1f))
+        Icon(Icons.Default.ChevronRight, contentDescription = null, tint = colors.text3, modifier = Modifier.size(16.dp))
     }
 }

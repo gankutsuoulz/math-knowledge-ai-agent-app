@@ -110,7 +110,7 @@ fun MineScreen(navController: NavHostController) {
             Column {
                 MineRow(colors, MineEntry("我的收藏", Icons.Default.Favorite, Screen.Favorites.route), navController)
                 MineRow(colors, MineEntry("错题本", Icons.Default.Layers, Screen.WrongBook.route), navController)
-                MineRow(colors, MineEntry("学习记录", Icons.Default.Schedule, Screen.Favorites.route), navController)
+                MineRow(colors, MineEntry("学习记录", Icons.Default.Schedule, Screen.Report.route), navController)
                 MineRow(colors, MineEntry("设置", Icons.Default.Settings, Screen.Settings.route), navController, showDivider = false)
             }
         }
